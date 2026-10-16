@@ -1,0 +1,123 @@
+DEAD MEMORY — Case 1 Play Mode test
+PASSED
+
+Real seconds: 673.5
+Walked metres: 764.9
+Assertions: 95
+PASS | New case spawns on second floor
+PASS | Ending locker remains on second floor
+PASS | Electrical panel is in upstairs Storage
+PASS | Notes have no world-space explanation text
+PASS | Medium sanity gradually changes atmosphere
+PASS | Low sanity deepens red world and strange ambience
+PASS | Atmosphere adds no jumpscare or health damage
+PASS | Atmosphere restores smoothly when sanity returns
+PASS | Clear line of sight and reach: intro
+PASS | Player E command accepted: intro
+PASS | Opened readable: intro
+PASS | Clear line of sight and reach: timetable
+PASS | Player E command accepted: timetable
+PASS | Opened readable: timetable
+PASS | Clear line of sight and reach: uv_schedule
+PASS | White flashlight does not reveal UV clue
+PASS | UV reveals physical trace; explanation waits for E inspection
+PASS | Clear line of sight and reach: uv_schedule
+PASS | Player E command accepted: uv_schedule
+PASS | Opened readable: uv_schedule
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Correct final code alone cannot bypass missing key
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2A
+OPEN DOOR via aimed E | SecondFloorDoor_Storage
+PASS | Clear line of sight and reach: toolbox
+PASS | Player E command accepted: toolbox
+PASS | Wrong toolbox code rejected
+PASS | Toolbox opens with 825 and gives screwdriver
+PASS | Clear line of sight and reach: maintenance
+PASS | Player E command accepted: maintenance
+PASS | Opened readable: maintenance
+PASS | Clear line of sight and reach: floor_plan
+PASS | Player E command accepted: floor_plan
+PASS | Opened readable: floor_plan
+PASS | Clear line of sight and reach: blue_fuse
+PASS | Player E command accepted: blue_fuse
+PASS | Blue fuse picked up with real E interaction
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2B
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Player E command accepted: uv_my_number
+PASS | Opened readable: uv_my_number
+OPEN DOOR via aimed E | Door_R2
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Jammed locker rejects missing crowbar
+PASS | Clear line of sight and reach: green_fuse
+PASS | Player E command accepted: green_fuse
+PASS | Green fuse collected
+OPEN DOOR via aimed E | SecondFloorDoor_Staff_West
+PASS | Clear line of sight and reach: records
+PASS | Player E command accepted: records
+PASS | Records drawer rejects missing staff key
+MANUAL QA INPUT | UV selected with the same CycleLightMode command as Q after synthetic keyboard pulse stalled; no items or progression granted.
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Player E command accepted: uv_breakers
+PASS | Opened readable: uv_breakers
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | Electrical panel UI opens
+PASS | Incomplete fuses cannot power panel
+OPEN DOOR via aimed E | Door_L1
+PASS | Clear line of sight and reach: vent
+PASS | Player E command accepted: vent
+PASS | Screwdriver opens vent and retrieves red fuse
+PASS | Clear line of sight and reach: staff_key
+PASS | Player E command accepted: staff_key
+PASS | Staff key collected
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | All three fuses installed without duplication
+PASS | Wrong switch order resets safely without consuming fuses
+PASS | Left-right-middle restores power and releases crowbar
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Crowbar opens locker and yields hour hand
+PASS | Clear line of sight and reach: records
+PASS | Player E command accepted: records
+PASS | Staff key opens drawer and yields minute hand
+PASS | New case resets progression and items
+PASS | Continue restores real checkpoint, notes, consumed fuses and inventory
+OPEN DOOR via aimed E | SecondFloorDoor_Staff_East
+PASS | Clear line of sight and reach: clock_note
+PASS | Player E command accepted: clock_note
+PASS | Opened readable: clock_note
+PASS | Clear line of sight and reach: clock
+PASS | Player E command accepted: clock
+PASS | Clock inspection opens
+PASS | Clock cannot solve before hands installed
+PASS | Both hands installed and consumed exactly once
+PASS | Wrong clock time rejected
+PASS | 03:15 solves clock and releases photograph key
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Wrong final code preserves key and remains recoverable
+PASS | Final locker uses key and correct code
+PASS | Clear line of sight and reach: photograph
+PASS | Player E command accepted: photograph
+PASS | Photograph completes Case 1 through real raycast interaction
+PASS | Key UV evidence preserved through checkpoint
+PASS | Case 1 ends upstairs through normal traversal
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+643s | บันทึก: บันทึกเรื่องนาฬิกา / ห้องครู ชั้น 2
+645s | ใส่เข็มชั่วโมง
+645s | ใส่เข็มนาที
+645s | ตั้งนาฬิกาผิด
+645s | ได้รับ กุญแจตู้รูปถ่าย
+645s | ตั้งนาฬิกา 03:15 และเปิดช่องลับ
+668s | รหัสตู้รูปถ่ายผิด
+668s | ปลดล็อกตู้รูปถ่าย 0315
+671s | ตรวจรูปถ่าย — จบความทรงจำโรงเรียน
+Position: (-27.14, 3.53, 2.86)
+Waypoint: (-27.25, 3.54, 2.85)

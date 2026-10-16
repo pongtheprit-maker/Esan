@@ -1,0 +1,63 @@
+Empty school area dressing saved. Clusters=59, renderers=253, occupied/protected locations skipped=1
+PLACED
+West hall trophy cabinet
+West hall chair trolley
+West hall waiting bench
+West hall archive cartons
+West hall cleaning trolley
+West hall exit waiting bench
+West hall drinking water corner
+West hall waste bin
+West hall abandoned potted shrub left
+West hall abandoned potted shrub right
+West hall school noticeboard
+West hall student work display
+Lower hall activity table A
+Lower hall activity table B
+Lower hall activity table C
+Lower hall activity table D
+Lower hall folded-chair rack
+Lower hall archive supplies
+Lower hall water dispenser
+Lower hall waiting bench
+Lower hall activity board
+Lower hall school display
+Rear connector school trophy case
+Rear connector waiting bench
+Rear connector old files
+Rear connector noticeboard
+Room archive cartons (-27.70, 3.50, 9.70)
+Room archive cartons (-10.00, 3.50, 9.70)
+Room archive cartons (-8.80, 0.00, 9.00)
+Room archive cartons (8.80, 0.00, 19.00)
+Staff room water dispenser
+Classroom 2A student work board
+Classroom 2B student work board
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+Exercise book and pencil on existing desk
+SKIPPED
+Restroom maintenance trolley: occupied

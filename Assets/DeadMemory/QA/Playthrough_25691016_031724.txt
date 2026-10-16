@@ -1,0 +1,32 @@
+DEAD MEMORY — Case 1 Play Mode test
+FAILED
+Clear line of sight and reach: floor_plan at floor_plan
+Real seconds: 56.0
+Walked metres: 66.9
+Assertions: 17
+PASS | Clear line of sight and reach: intro
+PASS | Opened readable: intro
+PASS | Clear line of sight and reach: timetable
+PASS | Opened readable: timetable
+PASS | Clear line of sight and reach: uv_schedule
+PASS | White flashlight does not reveal UV clue
+PASS | UV beam reveals and records clue
+PASS | Clear line of sight and reach: uv_schedule
+PASS | Opened readable: uv_schedule
+PASS | Clear line of sight and reach: photo_locker
+PASS | Correct final code alone cannot bypass missing key
+PASS | Clear line of sight and reach: toolbox
+PASS | Wrong toolbox code rejected
+PASS | Toolbox opens with 825 and gives screwdriver
+PASS | Clear line of sight and reach: maintenance
+PASS | Opened readable: maintenance
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+5s | บันทึก: บันทึกในห้องเรียน
+8s | บันทึก: ตารางเรียนเก่า / ห้อง 101
+12s | บันทึก: รอย UV บนกระดาน / ห้อง 101
+31s | รหัสกล่องเครื่องมือผิด
+31s | ได้รับ ไขควงปากแบน
+31s | ปลดล็อกกล่องเครื่องมือ 825
+42s | บันทึก: ใบแจ้งซ่อม / ห้อง 102

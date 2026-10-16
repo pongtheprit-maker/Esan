@@ -1,0 +1,119 @@
+PASSED
+
+Assertions: 115
+Real seconds: 134.1
+PASS | Expected restored usable school and stall door set
+PASS | Solid closed leaf: Door_L1
+PASS | Closed seating angle: Door_L1
+PASS | Open door retains physical collision: Door_L1
+PASS | Full unobstructed opening arc: Door_L1 angle=-88.00
+PASS | Returns solid to frame: Door_L1
+PASS | Solid closed leaf: Door_L2
+PASS | Closed seating angle: Door_L2
+PASS | Open door retains physical collision: Door_L2
+PASS | Full unobstructed opening arc: Door_L2 angle=-88.00
+PASS | Returns solid to frame: Door_L2
+PASS | Solid closed leaf: Door_L3
+PASS | Closed seating angle: Door_L3
+PASS | Open door retains physical collision: Door_L3
+PASS | Full unobstructed opening arc: Door_L3 angle=-88.00
+PASS | Returns solid to frame: Door_L3
+PASS | Solid closed leaf: Door_R0
+PASS | Closed seating angle: Door_R0
+PASS | Open door retains physical collision: Door_R0
+PASS | Full unobstructed opening arc: Door_R0 angle=88.00
+PASS | Returns solid to frame: Door_R0
+PASS | Solid closed leaf: Door_R1
+PASS | Closed seating angle: Door_R1
+PASS | Open door retains physical collision: Door_R1
+PASS | Full unobstructed opening arc: Door_R1 angle=88.00
+PASS | Returns solid to frame: Door_R1
+PASS | Solid closed leaf: Door_R2
+PASS | Closed seating angle: Door_R2
+PASS | Open door retains physical collision: Door_R2
+PASS | Full unobstructed opening arc: Door_R2 angle=88.00
+PASS | Returns solid to frame: Door_R2
+PASS | Solid closed leaf: Door_R3
+PASS | Closed seating angle: Door_R3
+PASS | Open door retains physical collision: Door_R3
+PASS | Full unobstructed opening arc: Door_R3 angle=88.00
+PASS | Returns solid to frame: Door_R3
+PASS | Solid closed leaf: Men_StallDoor_1
+PASS | Closed seating angle: Men_StallDoor_1
+PASS | Open door retains physical collision: Men_StallDoor_1
+PASS | Full unobstructed opening arc: Men_StallDoor_1 angle=85.00
+PASS | Returns solid to frame: Men_StallDoor_1
+PASS | Solid closed leaf: Men_StallDoor_2
+PASS | Closed seating angle: Men_StallDoor_2
+PASS | Open door retains physical collision: Men_StallDoor_2
+PASS | Full unobstructed opening arc: Men_StallDoor_2 angle=85.00
+PASS | Returns solid to frame: Men_StallDoor_2
+PASS | Solid closed leaf: Men_StallDoor_3
+PASS | Closed seating angle: Men_StallDoor_3
+PASS | Open door retains physical collision: Men_StallDoor_3
+PASS | Full unobstructed opening arc: Men_StallDoor_3 angle=85.00
+PASS | Returns solid to frame: Men_StallDoor_3
+PASS | Solid closed leaf: SecondFloorDoor_Classroom_2A
+PASS | Closed seating angle: SecondFloorDoor_Classroom_2A
+PASS | Open door retains physical collision: SecondFloorDoor_Classroom_2A
+PASS | Full unobstructed opening arc: SecondFloorDoor_Classroom_2A angle=-88.00
+PASS | Returns solid to frame: SecondFloorDoor_Classroom_2A
+PASS | Solid closed leaf: SecondFloorDoor_Classroom_2B
+PASS | Closed seating angle: SecondFloorDoor_Classroom_2B
+PASS | Open door retains physical collision: SecondFloorDoor_Classroom_2B
+PASS | Full unobstructed opening arc: SecondFloorDoor_Classroom_2B angle=88.00
+PASS | Returns solid to frame: SecondFloorDoor_Classroom_2B
+PASS | Solid closed leaf: SecondFloorDoor_Restroom_Men
+PASS | Closed seating angle: SecondFloorDoor_Restroom_Men
+PASS | Open door retains physical collision: SecondFloorDoor_Restroom_Men
+PASS | Full unobstructed opening arc: SecondFloorDoor_Restroom_Men angle=88.00
+PASS | Returns solid to frame: SecondFloorDoor_Restroom_Men
+PASS | Solid closed leaf: SecondFloorDoor_Restroom_Women
+PASS | Closed seating angle: SecondFloorDoor_Restroom_Women
+PASS | Open door retains physical collision: SecondFloorDoor_Restroom_Women
+PASS | Full unobstructed opening arc: SecondFloorDoor_Restroom_Women angle=-88.00
+PASS | Returns solid to frame: SecondFloorDoor_Restroom_Women
+PASS | Solid closed leaf: SecondFloorDoor_Staff_East
+PASS | Closed seating angle: SecondFloorDoor_Staff_East
+PASS | Open door retains physical collision: SecondFloorDoor_Staff_East
+PASS | Full unobstructed opening arc: SecondFloorDoor_Staff_East angle=88.00
+PASS | Returns solid to frame: SecondFloorDoor_Staff_East
+PASS | Solid closed leaf: SecondFloorDoor_Staff_West
+PASS | Closed seating angle: SecondFloorDoor_Staff_West
+PASS | Open door retains physical collision: SecondFloorDoor_Staff_West
+PASS | Full unobstructed opening arc: SecondFloorDoor_Staff_West angle=-88.00
+PASS | Returns solid to frame: SecondFloorDoor_Staff_West
+PASS | Solid closed leaf: SecondFloorDoor_Storage
+PASS | Closed seating angle: SecondFloorDoor_Storage
+PASS | Open door retains physical collision: SecondFloorDoor_Storage
+PASS | Full unobstructed opening arc: SecondFloorDoor_Storage angle=-88.00
+PASS | Returns solid to frame: SecondFloorDoor_Storage
+PASS | Solid closed leaf: Women_StallDoor_1
+PASS | Closed seating angle: Women_StallDoor_1
+PASS | Open door retains physical collision: Women_StallDoor_1
+PASS | Full unobstructed opening arc: Women_StallDoor_1 angle=85.00
+PASS | Returns solid to frame: Women_StallDoor_1
+PASS | Solid closed leaf: Women_StallDoor_2
+PASS | Closed seating angle: Women_StallDoor_2
+PASS | Open door retains physical collision: Women_StallDoor_2
+PASS | Full unobstructed opening arc: Women_StallDoor_2 angle=85.00
+PASS | Returns solid to frame: Women_StallDoor_2
+PASS | Solid closed leaf: Women_StallDoor_3
+PASS | Closed seating angle: Women_StallDoor_3
+PASS | Open door retains physical collision: Women_StallDoor_3
+PASS | Full unobstructed opening arc: Women_StallDoor_3 angle=85.00
+PASS | Returns solid to frame: Women_StallDoor_3
+PASS | Solid closed leaf: Women_StallDoor_4
+PASS | Closed seating angle: Women_StallDoor_4
+PASS | Open door retains physical collision: Women_StallDoor_4
+PASS | Full unobstructed opening arc: Women_StallDoor_4 angle=85.00
+PASS | Returns solid to frame: Women_StallDoor_4
+PASS | Solid closed leaf: Women_StallDoor_5
+PASS | Closed seating angle: Women_StallDoor_5
+PASS | Open door retains physical collision: Women_StallDoor_5
+PASS | Full unobstructed opening arc: Women_StallDoor_5 angle=85.00
+PASS | Returns solid to frame: Women_StallDoor_5
+PASS | Door pauses against a player-sized solid capsule
+PASS | Blocked door never turns into a trigger
+PASS | Door resumes after obstruction clears
+PASS | Obstruction test door closes normally

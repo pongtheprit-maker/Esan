@@ -1,0 +1,122 @@
+DEAD MEMORY — Hiding and batteries Play Mode test
+PASSED
+
+Real seconds: 316.8
+Walked metres: 223.9
+Assertions: 108
+COMPONENT SIMULATION: controlled charge/time values; fresh case resets them before real traversal.
+PASS | Full four-cell pack rejects extra battery
+PASS | 90 white-light seconds consume one cell
+PASS | 75 UV seconds consume one cell
+PASS | Lowered flashlight consumes no battery
+PASS | Charge depletion clamps exactly to zero
+PASS | One world battery restores one of four cells
+PASS | Rare flicker occurs once within first 121 lit seconds
+PASS | Lowering flashlight clears temporary flicker
+PASS | Depleted white flashlight actually switches its beam off
+PASS | Empty charge cannot reveal UV evidence
+PASS | Restoring a cell powers the selected mode again
+PASS | Six hiding cabinets split evenly across both floors
+PASS | New case drops exactly seven single batteries
+PASS | Initial wave is distributed over both floors
+PASS | Enough distinct supported spawn locations for repeated waves
+PASS | Battery HUD has four charge segments
+PASS | Spawned battery has physical support: 11
+PASS | Spawned battery has physical support: 27
+PASS | Spawned battery has physical support: 14
+PASS | Spawned battery has physical support: 35
+PASS | Spawned battery has physical support: 6
+PASS | Spawned battery has physical support: 36
+PASS | Spawned battery has physical support: 3
+PASS | Clear line of sight and reach: battery:3
+PASS | Aimed E cannot consume a pickup while full
+PASS | Real Q raises white beam and drains battery
+PASS | Real E collects one cell and caps charge at four
+PASS | Repeated E cannot collect the same battery twice
+PASS | Real Q UV mode drains faster than white mode
+PASS | Real Q lowers beam and stops drain
+PASS | Clear line of sight and reach: intro
+PASS | Existing E inspection still opens a readable note
+PASS | Read UI pauses resource clocks and blocks Q
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2A
+PASS | Clear line of sight and reach: 2F_StaffHall
+PASS | Real E enters and closes locker: 2F_StaffHall
+PASS | Capsule stays enabled while entering: 2F_StaffHall
+PASS | Movement is locked inside: 2F_StaffHall
+PASS | Hidden player cannot reveal flashlight: 2F_StaffHall
+PASS | Hidden flashlight consumes no charge: 2F_StaffHall
+PASS | Shared ghost sight query rejects concealed player
+PASS | Concealment suppresses existing proximity fear source
+PASS | Blocked exit rejects E without trapping player in an animation
+PASS | Real E exits and restores control: 2F_StaffHall
+PASS | Exit remains outside cabinet: 2F_StaffHall
+PASS | Shared sight query detects exposed player after exit
+PASS | Clear line of sight and reach: 2F_StorageHall
+PASS | Real E enters and closes locker: 2F_StorageHall
+PASS | Capsule stays enabled while entering: 2F_StorageHall
+PASS | Movement is locked inside: 2F_StorageHall
+PASS | Hidden player cannot reveal flashlight: 2F_StorageHall
+PASS | Hidden flashlight consumes no charge: 2F_StorageHall
+PASS | Real E exits and restores control: 2F_StorageHall
+PASS | Exit remains outside cabinet: 2F_StorageHall
+PASS | Clear line of sight and reach: 2F_RestroomHall
+PASS | Real E enters and closes locker: 2F_RestroomHall
+PASS | Capsule stays enabled while entering: 2F_RestroomHall
+PASS | Movement is locked inside: 2F_RestroomHall
+PASS | Hidden player cannot reveal flashlight: 2F_RestroomHall
+PASS | Hidden flashlight consumes no charge: 2F_RestroomHall
+PASS | Real E exits and restores control: 2F_RestroomHall
+PASS | Exit remains outside cabinet: 2F_RestroomHall
+PASS | Clear line of sight and reach: 1F_RearHall
+PASS | Real E enters and closes locker: 1F_RearHall
+PASS | Capsule stays enabled while entering: 1F_RearHall
+PASS | Movement is locked inside: 1F_RearHall
+PASS | Hidden player cannot reveal flashlight: 1F_RearHall
+PASS | Hidden flashlight consumes no charge: 1F_RearHall
+PASS | Real E exits and restores control: 1F_RearHall
+PASS | Exit remains outside cabinet: 1F_RearHall
+PASS | Clear line of sight and reach: 1F_MiddleHall
+PASS | Real E enters and closes locker: 1F_MiddleHall
+PASS | Capsule stays enabled while entering: 1F_MiddleHall
+PASS | Movement is locked inside: 1F_MiddleHall
+PASS | Hidden player cannot reveal flashlight: 1F_MiddleHall
+PASS | Hidden flashlight consumes no charge: 1F_MiddleHall
+PASS | Real E exits and restores control: 1F_MiddleHall
+PASS | Exit remains outside cabinet: 1F_MiddleHall
+PASS | Clear line of sight and reach: 1F_FrontHall
+PASS | Real E enters and closes locker: 1F_FrontHall
+PASS | Capsule stays enabled while entering: 1F_FrontHall
+PASS | Movement is locked inside: 1F_FrontHall
+PASS | Hidden player cannot reveal flashlight: 1F_FrontHall
+PASS | Hidden flashlight consumes no charge: 1F_FrontHall
+PASS | Real E exits and restores control: 1F_FrontHall
+PASS | Exit remains outside cabinet: 1F_FrontHall
+PASS | Second real timed wave drops seven more batteries; existing six remain
+PASS | Timed wave never stacks batteries at occupied points
+PASS | Battery remains on its assigned support: 11
+PASS | Battery remains on its assigned support: 27
+PASS | Battery remains on its assigned support: 14
+PASS | Battery remains on its assigned support: 35
+PASS | Battery remains on its assigned support: 6
+PASS | Battery remains on its assigned support: 36
+PASS | Battery remains on its assigned support: 29
+PASS | Battery remains on its assigned support: 1
+PASS | Battery remains on its assigned support: 20
+PASS | Battery remains on its assigned support: 4
+PASS | Battery remains on its assigned support: 30
+PASS | Battery remains on its assigned support: 13
+PASS | Battery remains on its assigned support: 17
+PASS | Clear line of sight and reach: 1F_FrontHall
+PASS | Real E enters and closes locker: 1F_FrontHall
+PASS | Capsule stays enabled while entering: 1F_FrontHall
+PASS | Saving while hidden records a safe outside position
+PASS | Continue releases hiding occupancy and restores capsule control
+PASS | Continue preserves charge, active pickups and drop countdown
+PASS | New case resets charge, seven initial drops and hiding
+PASS | Reloading a checkpoint does not farm extra batteries
+No chase AI is attached in this scene. Sight/concealment integration was checked with an observer fixture, not a live ghost chase.
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+Position: (0.03, 0.03, 9.50)
+Waypoint: (0.05, 0.04, 9.50)

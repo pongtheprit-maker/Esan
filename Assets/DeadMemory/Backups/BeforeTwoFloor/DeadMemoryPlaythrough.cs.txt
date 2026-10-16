@@ -1,0 +1,264 @@
+#if UNITY_EDITOR
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.LowLevel;
+
+/// <summary>Editor-only end-to-end driver. Walks with the real controller, aims and presses E/Q.
+/// UI button actions use the exact same public commands as OnGUI. It never grants items or sets puzzle flags.</summary>
+[DefaultExecutionOrder(-10000)]
+public class DeadMemoryPlaythrough : MonoBehaviour
+{
+    static bool booting, bootBackground;
+    public static DeadMemoryPlaythrough Launch()
+    {
+        if (!Application.isPlaying) throw new InvalidOperationException("Enter Play Mode first.");
+        bootBackground = Application.runInBackground; booting = true;
+        Application.runInBackground = true;
+        UnityEditor.EditorApplication.isPaused = false;
+        UnityEditor.EditorApplication.update -= UnityEditor.EditorApplication.QueuePlayerLoopUpdate;
+        UnityEditor.EditorApplication.update += UnityEditor.EditorApplication.QueuePlayerLoopUpdate;
+        UnityEditor.EditorApplication.QueuePlayerLoopUpdate();
+        return new GameObject("DeadMemory_Playthrough_TestOnly").AddComponent<DeadMemoryPlaythrough>();
+    }
+    public string Status = "Preparing", Failure = "", CurrentGoal = "";
+    public int Assertions;
+    public float WalkedMetres, RealSeconds;
+    public List<string> Steps = new List<string>();
+    SchoolPuzzleDirector d;
+    FirstPersonController p;
+    Keyboard kb, previousKeyboard;
+    InputSettings.BackgroundBehavior previousBackground;
+    bool previousRunInBackground;
+    float previousMaxDelta;
+    public string CurrentWaypoint = "";
+    float started;
+    Vector3 lastPosition;
+    const float Grid = .35f, MinX = -9.6f, MinZ = .4f;
+    const int Width = 56, Height = 113;
+    bool[] free;
+    SchoolPuzzleObject[] nodes;
+    public bool Finished { get { return Status == "PASSED" || Status == "FAILED"; } }
+
+    IEnumerator Start()
+    {
+        yield return null; // Allow the scene's normal Start methods to initialize inventory and UI.
+        d = SchoolPuzzleDirector.Instance; p = d.player;
+        nodes = FindObjectsByType<SchoolPuzzleObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        previousKeyboard = Keyboard.current;
+        previousBackground = InputSystem.settings.backgroundBehavior;
+        previousRunInBackground = booting ? bootBackground : Application.runInBackground; booting = false;
+        InputSystem.settings.backgroundBehavior = InputSettings.BackgroundBehavior.IgnoreFocus;
+        Application.runInBackground = true;
+        previousMaxDelta = Time.maximumDeltaTime; Time.maximumDeltaTime = .05f;
+        p.EditorTestInput = true;
+        kb = InputSystem.AddDevice<Keyboard>("DeadMemoryPlaytest"); kb.MakeCurrent();
+        UnityEditor.EditorApplication.update -= UnityEditor.EditorApplication.QueuePlayerLoopUpdate;
+        UnityEditor.EditorApplication.update += UnityEditor.EditorApplication.QueuePlayerLoopUpdate;
+        started = Time.realtimeSinceStartup; lastPosition = p.transform.position;
+        StartCoroutine(Guarded(Sequence()));
+    }
+    void Update()
+    {
+        if (p == null) return;
+        if (kb != null && !Finished) kb.MakeCurrent();
+        if (Finished) return;
+        WalkedMetres += Vector3.Distance(p.transform.position, lastPosition); lastPosition = p.transform.position;
+        RealSeconds = Time.realtimeSinceStartup - started;
+        if (RealSeconds > 600) Finish("FAILED", "Playthrough timed out.");
+    }
+    void LateUpdate() { if (kb != null && !Finished) kb.MakeCurrent(); }
+    IEnumerator Guarded(IEnumerator sequence)
+    {
+        var stack = new Stack<IEnumerator>(); stack.Push(sequence);
+        while (stack.Count > 0 && !Finished)
+        {
+            object next = null; bool more = false;
+            try { more = stack.Peek().MoveNext(); if (more) next = stack.Peek().Current; }
+            catch (Exception ex) { Finish("FAILED", ex.Message + " at " + CurrentGoal); yield break; }
+            if (!more) { stack.Pop(); continue; }
+            var child = next as IEnumerator;
+            if (child != null) stack.Push(child); else yield return next;
+        }
+        if (!Finished) Finish("PASSED", "");
+    }
+    void Check(bool condition, string label)
+    {
+        Assertions++;
+        if (!condition) throw new Exception(label);
+        Steps.Add("PASS | " + label);
+    }
+    void Finish(string status, string failure)
+    {
+        Status = status; Failure = failure; Neutral();
+        Directory.CreateDirectory("Assets/DeadMemory/QA");
+        string report = "DEAD MEMORY — Case 1 Play Mode test\n" + status + "\n" + failure + "\nReal seconds: " + RealSeconds.ToString("F1") + "\nWalked metres: " + WalkedMetres.ToString("F1") + "\nAssertions: " + Assertions + "\n" + string.Join("\n", Steps) + "\n\nGAME EVENT LOG\n" + string.Join("\n", d.actionLog);
+        report += "\nPosition: " + p.transform.position + "\nWaypoint: " + CurrentWaypoint;
+        File.WriteAllText("Assets/DeadMemory/QA/Playthrough_" + DateTime.Now.ToString("yyyyMMdd_HHmmss") + ".txt", report);
+        Debug.Log("[DMTEST] " + status + " | " + failure + " | " + Assertions + " assertions | " + WalkedMetres.ToString("F0") + "m");
+        RestoreInput();
+        UnityEditor.EditorApplication.isPaused = true;
+    }
+    void RestoreInput()
+    {
+        UnityEditor.EditorApplication.update -= UnityEditor.EditorApplication.QueuePlayerLoopUpdate;
+        if (kb != null) { InputSystem.RemoveDevice(kb); kb = null; }
+        if (previousKeyboard != null && previousKeyboard.added) previousKeyboard.MakeCurrent();
+        InputSystem.settings.backgroundBehavior = previousBackground;
+        Application.runInBackground = previousRunInBackground;
+        Time.maximumDeltaTime = previousMaxDelta;
+        if (p != null) { p.EditorMove = Vector2.zero; p.EditorTestInput = false; }
+    }
+    void OnDestroy() { if (kb != null) { Neutral(); RestoreInput(); } }
+    void Neutral() { if (p != null) p.EditorMove = Vector2.zero; if (kb != null) InputSystem.QueueStateEvent(kb, new KeyboardState()); }
+    IEnumerator Pulse(Key key)
+    {
+        InputSystem.QueueStateEvent(kb, new KeyboardState(key));
+        yield return null; yield return null;
+        Neutral(); yield return null; yield return null;
+    }
+    IEnumerator Rest(float seconds)
+    {
+        Neutral(); float until = Time.realtimeSinceStartup + seconds;
+        while (Time.realtimeSinceStartup < until) yield return null;
+    }
+    SchoolPuzzleObject Node(string id) { return nodes.First(x => x.id == id); }
+    Vector3 Point(SchoolPuzzleObject n) { return n.GetComponent<Collider>().bounds.center; }
+    void Aim(Vector3 point)
+    {
+        var v = point - p.playerCamera.transform.position;
+        p.SetViewDirection(Mathf.Atan2(v.x, v.z) * Mathf.Rad2Deg, -Mathf.Atan2(v.y, new Vector2(v.x, v.z).magnitude) * Mathf.Rad2Deg);
+    }
+    Vector3 Cell(int i) { return new Vector3(MinX + i % Width * Grid, .03f, MinZ + i / Width * Grid); }
+    int Index(Vector3 v)
+    {
+        int x = Mathf.Clamp(Mathf.RoundToInt((v.x - MinX) / Grid), 0, Width - 1);
+        int z = Mathf.Clamp(Mathf.RoundToInt((v.z - MinZ) / Grid), 0, Height - 1);
+        return z * Width + x;
+    }
+    void BuildGrid()
+    {
+        free = new bool[Width * Height]; var buffer = new Collider[96];
+        for (int i = 0; i < free.Length; i++)
+        {
+            var pos = Cell(i); bool clear = true;
+            int count = Physics.OverlapCapsuleNonAlloc(pos + Vector3.up * .32f, pos + Vector3.up * 1.48f, .305f, buffer, ~0, QueryTriggerInteraction.Ignore);
+            for (int j = 0; j < count; j++) if (!buffer[j].transform.IsChildOf(p.transform)) { clear = false; break; }
+            free[i] = clear && Physics.Raycast(pos + Vector3.up * .2f, Vector3.down, .4f, ~0, QueryTriggerInteraction.Ignore);
+        }
+    }
+    bool VisibleFrom(Vector3 eye, SchoolPuzzleObject n, bool requireFront = false)
+    {
+        Vector3 point = Point(n), delta = point - eye;
+        if (delta.magnitude > (requireFront ? 2.3f : 2.95f) || (requireFront && Vector3.Dot(eye - point, n.transform.forward) < .6f)) return false;
+        var hits = Physics.RaycastAll(eye, delta.normalized, delta.magnitude + .1f, ~0, QueryTriggerInteraction.Collide).Where(x => !x.transform.IsChildOf(p.transform)).OrderBy(x => x.distance).ToArray();
+        return hits.Length > 0 && hits[0].collider.GetComponentInParent<SchoolPuzzleObject>() == n;
+    }
+    List<Vector3> FindPath(SchoolPuzzleObject n)
+    {
+        BuildGrid(); int start = Index(p.transform.position);
+        if (!free[start]) start = Enumerable.Range(0,free.Length).Where(i=>free[i]).OrderBy(i=>(Cell(i)-p.transform.position).sqrMagnitude).First();
+        var prev = Enumerable.Repeat(-2,free.Length).ToArray(); var q = new Queue<int>(); prev[start]=-1;q.Enqueue(start);
+        int goal=-1;
+        while(q.Count>0)
+        {
+            int i=q.Dequeue();var pos=Cell(i);
+            if ((pos-Point(n)).sqrMagnitude<10 && VisibleFrom(pos+Vector3.up*1.65f,n,true)){goal=i;break;}
+            int x=i%Width,z=i/Width;
+            for(int dz=-1;dz<=1;dz++)for(int dx=-1;dx<=1;dx++)
+            {
+                if(dx==0&&dz==0)continue;int nx=x+dx,nz=z+dz;
+                if(nx<0||nx>=Width||nz<0||nz>=Height)continue;
+                int j=nz*Width+nx;if(!free[j]||prev[j]!=-2)continue;
+                if(dx!=0&&dz!=0&&(!free[z*Width+nx]||!free[nz*Width+x]))continue;
+                prev[j]=i;q.Enqueue(j);
+            }
+        }
+        if(goal<0)throw new Exception("No walkable, visible approach to "+n.id+" from "+p.transform.position);
+        var path=new List<Vector3>();for(int i=goal;i>=0;i=prev[i])path.Add(Cell(i));path.Reverse();return path;
+    }
+    IEnumerator Go(string id)
+    {
+        CurrentGoal=id;Status="Walking to "+id;
+        var n=Node(id);var path=FindPath(n);
+        foreach(var target in path)
+        {
+            CurrentWaypoint=target.ToString();
+            float began=Time.realtimeSinceStartup;
+            while(Vector2.Distance(new Vector2(p.transform.position.x,p.transform.position.z),new Vector2(target.x,target.z))>.22f)
+            {
+                if(Time.realtimeSinceStartup-began>4)throw new Exception("Movement blocked at "+p.transform.position+" toward "+target);
+                Aim(new Vector3(target.x,p.playerCamera.transform.position.y,target.z));
+                p.EditorMove=Vector2.up;yield return null;
+            }
+        }
+        yield return Rest(.5f); Aim(Point(n));yield return Rest(.25f);Aim(Point(n));
+        Check(VisibleFrom(p.playerCamera.transform.position,n),"Clear line of sight and reach: "+id);
+    }
+    IEnumerator Interact(string id)
+    {
+        yield return Go(id); Aim(Point(Node(id)));
+        Check(p.GetComponent<PlayerDoorInteractor>().TryInteractFromView(), "Player E command accepted: " + id);
+        yield return Rest(.35f);
+    }
+    IEnumerator Read(string id)
+    {
+        yield return Interact(id);Check(d.Modal=="note","Opened readable: "+id);d.CloseModal();yield return Rest(.3f);
+    }
+    IEnumerator Code(string digits)
+    {
+        Key[] keys={Key.Digit0,Key.Digit1,Key.Digit2,Key.Digit3,Key.Digit4,Key.Digit5,Key.Digit6,Key.Digit7,Key.Digit8,Key.Digit9};
+        foreach(char c in digits) { d.PressDigit(c-'0'); yield return null; } d.SubmitCode();yield return Rest(.3f);
+    }
+    IEnumerator Sequence()
+    {
+        d.BeginNewCase(); yield return Rest(.5f); lastPosition=p.transform.position;
+        yield return Read("intro"); yield return Read("timetable");
+        yield return Go("uv_schedule");
+        yield return Pulse(Key.Q); yield return Rest(.7f);Aim(Point(Node("uv_schedule")));yield return Rest(.8f);
+        Check(!FlashlightController.Active.IsUVOn && Node("uv_schedule").uv.Amount < .05f,"White flashlight does not reveal UV clue");
+        yield return Pulse(Key.Q); yield return Rest(.7f);Aim(Point(Node("uv_schedule")));yield return Rest(1.2f);
+        Check(FlashlightController.Active.IsUVOn && d.state.notes.Contains("uv_schedule"),"UV beam reveals and records clue");
+        yield return Read("uv_schedule");
+        yield return Interact("photo_locker");yield return Code("0315");Check(!d.state.locker,"Correct final code alone cannot bypass missing key");d.CloseModal();yield return Rest(.3f);
+        yield return Interact("toolbox");yield return Code("000");Check(!d.state.toolbox,"Wrong toolbox code rejected");yield return Code("825");Check(d.state.toolbox && PlayerInventory.Instance.Has("dm_screwdriver"),"Toolbox opens with 825 and gives screwdriver");
+        yield return Read("maintenance");yield return Read("floor_plan");
+        yield return Interact("blue_fuse");Check(PlayerInventory.Instance.Has("dm_fuse_blue"),"Blue fuse picked up with real E interaction");
+        yield return Go("uv_my_number");Aim(Point(Node("uv_my_number")));yield return Rest(1.2f);yield return Read("uv_my_number");
+        yield return Interact("supply");Check(!d.state.supply,"Jammed locker rejects missing crowbar");
+        yield return Interact("green_fuse");Check(PlayerInventory.Instance.Has("dm_fuse_green"),"Green fuse collected");
+        yield return Interact("records");Check(!d.state.records,"Records drawer rejects missing staff key");
+        yield return Go("uv_breakers");Aim(Point(Node("uv_breakers")));yield return Rest(1.2f);yield return Read("uv_breakers");
+        yield return Interact("fuse_panel");Check(d.Modal=="breaker","Electrical panel UI opens");d.InstallFuses();
+        Check(d.state.fuses.Count==2 && !d.PressBreaker(0) && !d.state.power,"Incomplete fuses cannot power panel");
+        d.CloseModal();yield return Rest(.3f);
+        yield return Interact("vent");Check(d.state.vent && PlayerInventory.Instance.Has("dm_fuse_red"),"Screwdriver opens vent and retrieves red fuse");
+        yield return Interact("staff_key");Check(PlayerInventory.Instance.Has("dm_staff_key"),"Staff key collected");
+        yield return Interact("fuse_panel");d.InstallFuses();Check(d.state.fuses.Count==3,"All three fuses installed without duplication");
+        d.PressBreaker(0);d.PressBreaker(1);d.PressBreaker(2);Check(!d.state.power && d.state.fuses.Count==3,"Wrong switch order resets safely without consuming fuses");
+        d.PressBreaker(0);d.PressBreaker(2);d.PressBreaker(1);yield return Rest(.4f);Check(d.state.power && PlayerInventory.Instance.Has("dm_crowbar"),"Left-right-middle restores power and releases crowbar");
+        yield return Interact("supply");Check(d.state.supply && PlayerInventory.Instance.Has("dm_hour"),"Crowbar opens locker and yields hour hand");
+        yield return Interact("records");Check(d.state.records && PlayerInventory.Instance.Has("dm_minute"),"Staff key opens drawer and yields minute hand");d.CloseModal();yield return Rest(.3f);
+        // Continue is tested against the game's actual serialized checkpoint, without inventing state.
+        string checkpoint=PlayerPrefs.GetString(d.SaveKey);int notes=d.state.notes.Count;
+        d.BeginNewCase();Check(!d.state.power && !d.state.locker && PlayerInventory.Instance.Count==0,"New case resets progression and items");
+        PlayerPrefs.SetString(d.SaveKey,checkpoint);d.ContinueCase();yield return Rest(.4f);lastPosition=p.transform.position;
+        Check(d.state.power && d.state.notes.Count==notes && PlayerInventory.Instance.Has("dm_hour") && PlayerInventory.Instance.Has("dm_minute"),"Continue restores real checkpoint, notes, consumed fuses and inventory");
+        yield return Read("clock_note");yield return Interact("clock");Check(d.Modal=="clock","Clock inspection opens");
+        Check(!d.ConfirmClock() && !d.state.clock,"Clock cannot solve before hands installed");d.InstallClockParts();
+        Check(d.state.hourInstalled&&d.state.minuteInstalled&&!PlayerInventory.Instance.Has("dm_hour"),"Both hands installed and consumed exactly once");
+        Check(!d.ConfirmClock() && !d.state.clock,"Wrong clock time rejected");
+        d.AdjustClock(1,0);d.AdjustClock(1,0);d.AdjustClock(1,0);d.AdjustClock(0,5);d.AdjustClock(0,5);d.AdjustClock(0,5);
+        Check(d.ConfirmClock()&&d.state.clock&&PlayerInventory.Instance.Has("dm_photo_key"),"03:15 solves clock and releases photograph key");yield return Rest(.4f);
+        yield return Interact("photo_locker");yield return Code("0000");Check(!d.state.locker&&PlayerInventory.Instance.Has("dm_photo_key"),"Wrong final code preserves key and remains recoverable");
+        yield return Code("0315");Check(d.state.locker&&!PlayerInventory.Instance.Has("dm_photo_key"),"Final locker uses key and correct code");
+        yield return Rest(1.1f);yield return Interact("photograph");Check(d.state.complete&&d.Modal=="ending","Photograph completes Case 1 through real raycast interaction");
+        Check(d.state.notes.Contains("uv_my_number")&&d.state.notes.Contains("uv_breakers"),"Key UV evidence preserved through checkpoint");
+        Status="Running";yield return Rest(2f);
+    }
+}
+#endif

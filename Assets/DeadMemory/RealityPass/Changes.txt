@@ -1,0 +1,13 @@
+Doors: fitted 22, restored missing leaf 0, isolated remote duplicate slabs 3. Door_L0 remains a doorless foyer opening.
+Cabinet photo_locker: moved (0.000, 0.000, 0.000), backing clearance 0.016 m.
+Cabinet fuse_panel: moved (0.000, 0.000, 0.000), backing clearance 0.016 m.
+Cabinet vent: moved (0.000, 0.000, 1.054), backing clearance 0.016 m.
+Cabinet supply: moved (0.000, 0.000, 0.954), backing clearance 0.016 m.
+Cabinet toolbox: moved (0.000, 0.000, 0.000), backing clearance 0.016 m.
+Cabinet records: moved (0.000, 0.000, 0.000), backing clearance 0.016 m.
+Puzzle assemblies backed by real walls: 6.
+Furniture contact groups inspected 363, grounded assemblies 48, largest vertical correction 0.020 m.
+Exact duplicate structural assemblies deactivated: 0.
+Distinct scanned surfaces: 122 wall sections, 3 ceiling slabs, 20 stair treads. Wall-space stochastic sampling removes repeated stain stamps.
+Static cuboid coplanar intersections removed by mesh face clipping: 528; render sections 1598, retained surface rectangles 9633. Original solid collision envelopes retained.
+Supported stair nosings fitted: 20. No new stair collision obstacles.

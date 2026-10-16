@@ -1,0 +1,441 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
+using UnityEngine.InputSystem;
+
+[Serializable]
+public class SchoolPuzzleProgress
+{
+    public List<string> collected = new List<string>();
+    public List<string> inventory = new List<string>();
+    public List<string> notes = new List<string>();
+    public List<string> fuses = new List<string>();
+    public bool toolbox, vent, power, supply, records, hourInstalled, minuteInstalled, clock, locker, complete;
+    public float sanity = 100f;
+    public float seconds;
+    public Vector3 position;
+    public float yaw;
+    public int hintCount;
+    public bool survivalInitialized;
+    public float flashlightCells = 4, batterySeconds = 300;
+    public int batteryWaves, batteryTotal, batteryPending;
+    public List<int> batterySlots = new List<int>();
+}
+
+public class SchoolPuzzleDirector : MonoBehaviour
+{
+    public static SchoolPuzzleDirector Instance { get; private set; }
+    public static bool ModalOpen { get { return Instance != null && Instance.modal != ""; } }
+    public FirstPersonController player;
+    public Vector3 spawnPosition;
+    public float spawnYaw = 205;
+    public Transform clockHour, clockMinute;
+    public GameObject powerRewardModel;
+    public SchoolPuzzleProgress state = new SchoolPuzzleProgress();
+    public readonly List<string> actionLog = new List<string>();
+    public string Modal { get { return modal; } }
+    public bool Started { get { return started; } }
+    public string EnteredCode { get { return enteredCode; } }
+    public string Feedback { get { return feedback; } }
+    public string CurrentObjectId { get { return current != null ? current.id : ""; } }
+    public string SaveKey { get { return "DEAD_MEMORY.Case1.TwoFloor.v2"; } }
+    string modal = "start", enteredCode = "", feedback = "", hint = "";
+    string previousModal = "";
+    float hintAt, lastClose, fade;
+    int clockH, clockM;
+    List<int> breakers = new List<int>();
+    bool started;
+    PlayerInventory inventory;
+    PlayerDoorInteractor interactor;
+    SchoolPuzzleObject current;
+    SchoolPuzzleObject[] objects;
+    GUIStyle heading, body, small, button;
+    AudioSource audioSource;
+    AudioClip tick;
+    public bool CanInteract { get { return started && modal == "" && Time.unscaledTime > lastClose + 0.2f; } }
+
+    void Awake() { Instance = this; }
+    void Start()
+    {
+        if (player == null) player = FindFirstObjectByType<FirstPersonController>();
+        inventory = player.GetComponent<PlayerInventory>();
+        if (inventory == null) inventory = player.gameObject.AddComponent<PlayerInventory>();
+        interactor = player.GetComponent<PlayerDoorInteractor>();
+        objects = FindObjectsByType<SchoolPuzzleObject>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        if (powerRewardModel == null)
+        {
+            var environment = GameObject.Find("DeadMemory_Environment");
+            if (environment != null)
+            {
+                var channel = environment.transform.Find("Crowbar");
+                if (channel != null) powerRewardModel = channel.gameObject;
+            }
+        }
+        var prompt = player.GetComponent<InteractionPrompt>();
+        if (prompt != null) prompt.showInventoryHud = false;
+        audioSource = gameObject.AddComponent<AudioSource>(); audioSource.spatialBlend = 0f; audioSource.volume = 0.16f;
+        DeadMemorySettings.Route(audioSource);
+        tick = AudioClip.Create("Memory mechanism", 4800, 1, 24000, false);
+        var samples = new float[4800];
+        for (int i = 0; i < samples.Length; i++) samples[i] = Mathf.Sin(i * 0.16f) * Mathf.Exp(-i / 500f) * 0.35f;
+        tick.SetData(samples, 0);
+        UVRevealable.Revealed += OnUVRevealed;
+        SyncWorld(); SetControls();
+    }
+    void OnDestroy()
+    {
+        UVRevealable.Revealed -= OnUVRevealed;
+        if (tick != null) Destroy(tick);
+        if (Instance == this) Instance = null;
+        if (player != null) player.enabled = true;
+        if (interactor != null) interactor.enabled = true;
+        Cursor.lockState = CursorLockMode.None; Cursor.visible = true;
+    }
+    void Update()
+    {
+        SetControls();
+        var kb = Keyboard.current;
+        if (started && !state.complete) state.seconds += Time.unscaledDeltaTime;
+        if (state.complete) fade = Mathf.MoveTowards(fade, 1f, Time.unscaledDeltaTime * 0.65f);
+        if (kb == null) return;
+        if (kb.escapeKey.wasPressedThisFrame && modal != "start" && modal != "ending") CloseModal();
+        if (kb.tabKey.wasPressedThisFrame && started && !state.complete)
+        {
+            if (modal == "journal") CloseJournal(); else { previousModal = modal; modal = "journal"; }
+        }
+        if (modal == "toolbox" || modal == "locker")
+        {
+            Key[] digits = { Key.Digit0, Key.Digit1, Key.Digit2, Key.Digit3, Key.Digit4, Key.Digit5, Key.Digit6, Key.Digit7, Key.Digit8, Key.Digit9 };
+            Key[] numpad = { Key.Numpad0, Key.Numpad1, Key.Numpad2, Key.Numpad3, Key.Numpad4, Key.Numpad5, Key.Numpad6, Key.Numpad7, Key.Numpad8, Key.Numpad9 };
+            for (int i = 0; i <= 9; i++) if (kb[digits[i]].wasPressedThisFrame || kb[numpad[i]].wasPressedThisFrame) PressDigit(i);
+            if (kb.backspaceKey.wasPressedThisFrame && enteredCode.Length > 0) enteredCode = enteredCode.Substring(0, enteredCode.Length - 1);
+            if (kb.enterKey.wasPressedThisFrame || kb.numpadEnterKey.wasPressedThisFrame) SubmitCode();
+        }
+    }
+    void SetControls()
+    {
+        bool free = modal == "";
+        if (!free && InteractionPrompt.Instance != null) InteractionPrompt.Instance.ClearPrompt();
+        if (player != null && player.enabled != free) player.enabled = free;
+        if (interactor != null && interactor.enabled != free) interactor.enabled = free;
+        Cursor.lockState = free ? CursorLockMode.Locked : CursorLockMode.None;
+        Cursor.visible = !free;
+    }
+    public void BeginNewCase()
+    {
+        foreach (var id in inventory.ItemIds.ToArray()) if (id.StartsWith("dm_")) inventory.Remove(id);
+        state = new SchoolPuzzleProgress(); actionLog.Clear();
+        PlayerPrefs.DeleteKey(SaveKey); started = true; fade = 0; modal = ""; feedback = ""; hint = "";
+        var hiding = player.GetComponent<PlayerHiding>(); if (hiding != null) hiding.AbortForReset();
+        ResetPlayer(spawnPosition, spawnYaw);
+        if (BatteryDropManager.Instance != null) BatteryDropManager.Instance.ResetForNewCase();
+        var sanity = player.GetComponent<SanitySystem>(); if (sanity != null) sanity.SetSanity(100);
+        foreach (var o in objects) { o.gameObject.SetActive(true); if (o.uv != null) o.uv.ResetForNewCase(); }
+        SyncWorld(); Log("เริ่มความทรงจำ"); Save(); lastClose = Time.unscaledTime;
+        Message("Q: ไฟขาว / UV / เก็บไฟฉาย   •   E: สำรวจ   •   Tab: สมุดบันทึก", 7);
+        SetControls();
+    }
+    public bool TryReadCheckpoint(out SchoolPuzzleProgress checkpoint, out string reason)
+    {
+        checkpoint = null;
+        reason = "NO CHECKPOINT FOUND. START A NEW GAME.";
+        if (!PlayerPrefs.HasKey(SaveKey)) return false;
+        try
+        {
+            string json = PlayerPrefs.GetString(SaveKey);
+            if (string.IsNullOrWhiteSpace(json) || !json.Contains("\"position\"") || !json.Contains("\"inventory\""))
+                throw new FormatException("Incomplete checkpoint");
+            var saved = JsonUtility.FromJson<SchoolPuzzleProgress>(json);
+            if (saved == null || saved.inventory == null || saved.collected == null || saved.notes == null || saved.fuses == null ||
+                !Finite(saved.position.x) || !Finite(saved.position.y) || !Finite(saved.position.z) ||
+                !Finite(saved.yaw) || !Finite(saved.seconds) || saved.seconds < 0 || !Finite(saved.sanity))
+                throw new FormatException("Invalid checkpoint");
+            checkpoint = saved;
+            reason = saved.complete ? "THIS CASE IS COMPLETE. START A NEW GAME TO REPLAY." : "";
+            return !saved.complete;
+        }
+        catch (Exception)
+        {
+            reason = "THIS CHECKPOINT COULD NOT BE READ. THE SAVE HAS BEEN KEPT.";
+            return false;
+        }
+    }
+    static bool Finite(float value) { return !float.IsNaN(value) && !float.IsInfinity(value); }
+    public void ContinueCase()
+    {
+        SchoolPuzzleProgress checkpoint; string reason;
+        if (!TryReadCheckpoint(out checkpoint, out reason)) { Debug.LogWarning("[DEAD MEMORY] " + reason); return; }
+        state = checkpoint;
+        foreach (var id in inventory.ItemIds.ToArray()) if (id.StartsWith("dm_")) inventory.Remove(id);
+        foreach (string id in state.inventory) inventory.Add(id, ItemName(id));
+        var hiding = player.GetComponent<PlayerHiding>(); if (hiding != null) hiding.AbortForReset();
+        started = true; modal = ""; ResetPlayer(state.position, state.yaw);
+        if (BatteryDropManager.Instance != null) BatteryDropManager.Instance.Restore(state);
+        var restoredSanity = player.GetComponent<SanitySystem>(); if (restoredSanity != null) restoredSanity.SetSanity(state.sanity);
+        SyncWorld(); lastClose = Time.unscaledTime; SetControls();
+    }
+    void ResetPlayer(Vector3 position, float yaw)
+    {
+        var cc = player.GetComponent<CharacterController>(); cc.enabled = false;
+        player.transform.SetPositionAndRotation(position, Quaternion.Euler(0, yaw, 0)); cc.enabled = true;
+        player.SetViewDirection(yaw, 0);
+    }
+    public void CloseModal() { modal = ""; enteredCode = ""; feedback = ""; lastClose = Time.unscaledTime; Save(); SetControls(); }
+    public void CloseJournal() { modal = previousModal; previousModal = ""; SetControls(); }
+    public void Interact(SchoolPuzzleObject o)
+    {
+        if (!CanInteract || o == null || !o.CanInspect) return;
+        current = o; feedback = ""; enteredCode = ""; lastClose = Time.unscaledTime;
+        switch (o.kind)
+        {
+            case SchoolPuzzleKind.Note: case SchoolPuzzleKind.UVClue: RecordNote(o); modal = "note"; break;
+            case SchoolPuzzleKind.Pickup: Grant(o.itemId, o.itemName); o.gameObject.SetActive(false); break;
+            case SchoolPuzzleKind.Toolbox: if (state.toolbox) Message("กล่องว่างแล้ว"); else modal = "toolbox"; break;
+            case SchoolPuzzleKind.Vent:
+                if (state.vent) Message("เอาฟิวส์ออกมาแล้ว");
+                else if (!inventory.Has("dm_screwdriver")) Message("ตะแกรงยึดด้วยสกรู ต้องใช้ไขควง");
+                else { state.vent = true; o.SetOpen(true); Grant("dm_fuse_red", "ฟิวส์สีแดง"); Log("เปิดตะแกรงและเก็บฟิวส์สีแดง"); }
+                break;
+            case SchoolPuzzleKind.FusePanel: breakers.Clear(); modal = "breaker"; break;
+            case SchoolPuzzleKind.SupplyLocker:
+                if (state.supply) Message("ตู้ว่างแล้ว");
+                else if (!inventory.Has("dm_crowbar")) Message("บานตู้บิดติด ต้องใช้ชะแลง");
+                else { state.supply = true; o.SetOpen(true); Grant("dm_hour", "เข็มชั่วโมง"); Log("งัดตู้และพบเข็มชั่วโมง"); Pulse(); }
+                break;
+            case SchoolPuzzleKind.RecordsDrawer:
+                if (state.records) { RecordNote(o); modal = "note"; }
+                else if (!inventory.Has("dm_staff_key")) Message("ลิ้นชักครูล็อกอยู่ กุญแจอาจอยู่ในกระเป๋าของห้อง 103 ชั้น 1");
+                else { state.records = true; o.SetOpen(true); Grant("dm_minute", "เข็มนาที"); RecordNote(o); modal = "note"; Pulse(); }
+                break;
+            case SchoolPuzzleKind.Clock: clockH = state.clock ? 3 : 12; clockM = state.clock ? 15 : 0; modal = "clock"; break;
+            case SchoolPuzzleKind.PhotoLocker:
+                if (state.locker) Message("รูปถ่ายอยู่ในตู้ ลองตรวจดู"); else modal = "locker"; break;
+            case SchoolPuzzleKind.Photograph:
+                if (!state.locker) return;
+                state.complete = true; modal = "ending"; Log("ตรวจรูปถ่าย — จบความทรงจำโรงเรียน"); Save(); Pulse(); break;
+        }
+        SyncWorld(); Save(); SetControls();
+    }
+    void OnUVRevealed(UVRevealable uv)
+    {
+        if (!started) return;
+        var o = objects.FirstOrDefault(x => x.uv == uv);
+        if (o != null) Message("พบร่องรอยหมึก — เล็งแล้วกด E เพื่อตรวจ", 3);
+    }
+    void RecordNote(SchoolPuzzleObject o)
+    {
+        if (state.notes.Contains(o.id)) return;
+        state.notes.Add(o.id); Log("บันทึก: " + o.title); Message("บันทึกคำใบ้แล้ว — กด Tab เพื่อทบทวน", 3); Pulse();
+    }
+    void Grant(string id, string name)
+    {
+        if (state.collected.Contains(id)) return;
+        state.collected.Add(id); inventory.Add(id, name); Log("ได้รับ " + name); Message("ได้รับ: " + name); Save();
+    }
+    public string ItemName(string id)
+    {
+        var o = objects.FirstOrDefault(x => x.itemId == id);
+        if (o != null) return o.itemName;
+        switch (id) {
+            case "dm_screwdriver": return "ไขควงปากแบน"; case "dm_fuse_red": return "ฟิวส์สีแดง";
+            case "dm_crowbar": return "ชะแลง"; case "dm_hour": return "เข็มชั่วโมง";
+            case "dm_minute": return "เข็มนาที"; case "dm_photo_key": return "กุญแจตู้รูปถ่าย";
+            default: return id;
+        }
+    }
+    public void PressDigit(int value)
+    {
+        int length = modal == "toolbox" ? 3 : 4;
+        if ((modal == "toolbox" || modal == "locker") && enteredCode.Length < length) enteredCode += Mathf.Clamp(value, 0, 9).ToString();
+    }
+    public bool SubmitCode()
+    {
+        if (modal == "toolbox")
+        {
+            if (enteredCode != "825") { feedback = "รหัสไม่ถูกต้อง — ดูตารางเรียนและรอย UV บนกระดานห้อง 2A"; enteredCode = ""; Log("รหัสกล่องเครื่องมือผิด"); return false; }
+            state.toolbox = true; Grant("dm_screwdriver", "ไขควงปากแบน"); Log("ปลดล็อกกล่องเครื่องมือ 825"); SyncWorld(); CloseModal(); return true;
+        }
+        if (modal == "locker")
+        {
+            if (!inventory.Has("dm_photo_key")) { feedback = "ช่องกุญแจยังล็อกอยู่ ต้องหากุญแจที่ซ่อนในนาฬิกา"; return false; }
+            if (enteredCode != "0315") { feedback = "รหัสไม่ถูกต้อง — เลขของฉัน ตามด้วยเลขของเพื่อน"; enteredCode = ""; Log("รหัสตู้รูปถ่ายผิด"); return false; }
+            state.locker = true; inventory.Remove("dm_photo_key"); Log("ปลดล็อกตู้รูปถ่าย 0315"); SyncWorld(); Pulse(); CloseModal(); return true;
+        }
+        return false;
+    }
+    public void InstallFuses()
+    {
+        if (modal != "breaker" || state.power) return;
+        foreach (string id in new[] { "dm_fuse_blue", "dm_fuse_green", "dm_fuse_red" })
+            if (!state.fuses.Contains(id) && inventory.Has(id)) { state.fuses.Add(id); inventory.Remove(id); Log("ใส่ " + ItemName(id)); }
+        feedback = state.fuses.Count == 3 ? "ใส่ฟิวส์ครบแล้ว อ่านผัง UV ที่ห้องครูฝั่งตะวันตก ชั้น 2 เพื่อเรียงสวิตช์" : "ฟิวส์ " + state.fuses.Count + "/3 — ยังมีช่องว่าง";
+        SyncWorld(); Save();
+    }
+    public bool PressBreaker(int value)
+    {
+        if (modal != "breaker" || state.power) return false;
+        if (state.fuses.Count != 3) { feedback = "ต้องใส่ฟิวส์ให้ครบก่อน"; return false; }
+        breakers.Add(value); Pulse(); feedback = "ลำดับ: " + string.Join(" → ", breakers.Select(i => new[] { "ซ้าย", "กลาง", "ขวา" }[i]));
+        if (breakers.Count < 3) return false;
+        if (breakers.SequenceEqual(new[] { 0, 2, 1 }))
+        { state.power = true; Grant("dm_crowbar", "ชะแลง"); Log("คืนไฟตามผัง ซ้าย-ขวา-กลาง"); SyncWorld(); CloseModal(); return true; }
+        breakers.Clear(); feedback = "วงจรตัด ลำดับผิด — ลองใหม่ได้โดยไม่เสียฟิวส์"; Log("ลำดับสวิตช์ผิด"); return false;
+    }
+    public void InstallClockParts()
+    {
+        if (modal != "clock" || state.clock) return;
+        if (!state.hourInstalled && inventory.Has("dm_hour")) { state.hourInstalled = true; inventory.Remove("dm_hour"); Log("ใส่เข็มชั่วโมง"); }
+        if (!state.minuteInstalled && inventory.Has("dm_minute")) { state.minuteInstalled = true; inventory.Remove("dm_minute"); Log("ใส่เข็มนาที"); }
+        feedback = state.hourInstalled && state.minuteInstalled ? "หมุนเข็มตามเลขที่ในความทรงจำ แล้วกดยืนยัน" : "เข็มชั่วโมงอยู่ในตู้ติดแน่นห้อง 106 / เข็มนาทีอยู่ในตู้แฟ้มห้องครูฝั่งตะวันตก ชั้น 2";
+        SyncClock(); Save();
+    }
+    public void AdjustClock(int hourDelta, int minuteDelta)
+    {
+        if (modal != "clock" || state.clock) return;
+        clockH = ((clockH - 1 + hourDelta + 12) % 12) + 1;
+        clockM = (clockM + minuteDelta + 60) % 60; SyncClock();
+    }
+    public bool ConfirmClock()
+    {
+        if (modal != "clock" || state.clock) return false;
+        if (!state.hourInstalled || !state.minuteInstalled) { feedback = "ยังใส่เข็มไม่ครบ"; return false; }
+        if (clockH != 3 || clockM != 15) { feedback = "ยังไม่ใช่เวลานั้น — เลขฉันเป็นชั่วโมง เลขเพื่อนเป็นนาที"; Log("ตั้งนาฬิกาผิด"); return false; }
+        state.clock = true; Grant("dm_photo_key", "กุญแจตู้รูปถ่าย"); Log("ตั้งนาฬิกา 03:15 และเปิดช่องลับ"); SyncWorld(); Pulse(); CloseModal(); return true;
+    }
+    void SyncClock()
+    {
+        if (state.clock) { clockH = 3; clockM = 15; }
+        if (clockHour != null) { clockHour.gameObject.SetActive(state.hourInstalled); clockHour.localEulerAngles = new Vector3(0, 0, -(clockH % 12 * 30 + clockM * 0.5f)); }
+        if (clockMinute != null) { clockMinute.gameObject.SetActive(state.minuteInstalled); clockMinute.localEulerAngles = new Vector3(0, 0, -clockM * 6); }
+    }
+    void SyncWorld()
+    {
+        if (objects == null) return;
+        if (powerRewardModel != null) powerRewardModel.SetActive(!state.power);
+        foreach (var o in objects)
+        {
+            if (o.kind == SchoolPuzzleKind.Pickup) o.gameObject.SetActive(!state.collected.Contains(o.itemId));
+            if (o.kind == SchoolPuzzleKind.Photograph) o.gameObject.SetActive(state.locker);
+            if (o.kind == SchoolPuzzleKind.Toolbox) o.SetOpen(state.toolbox);
+            if (o.kind == SchoolPuzzleKind.Vent) o.SetOpen(state.vent);
+            if (o.kind == SchoolPuzzleKind.SupplyLocker) o.SetOpen(state.supply);
+            if (o.kind == SchoolPuzzleKind.RecordsDrawer) o.SetOpen(state.records);
+            if (o.kind == SchoolPuzzleKind.PhotoLocker)
+            {
+                o.SetOpen(state.locker);
+                var c = o.GetComponent<BoxCollider>(); if (c != null) c.enabled = !state.locker;
+            }
+        }
+        foreach (var l in GetComponentsInChildren<Light>(true)) if (l.name.StartsWith("PowerRestored")) l.enabled = state.power;
+        foreach (var t in GetComponentsInChildren<Transform>(true))
+            if (t.name.StartsWith("FuseCartridge_")) t.gameObject.SetActive(state.fuses.Contains(t.name.Substring("FuseCartridge_".Length)));
+        SyncClock();
+    }
+    public void SaveCheckpoint() { Save(); }
+    void Save()
+    {
+        if (!started || inventory == null) return;
+        state.inventory = inventory.ItemIds.Where(x => x.StartsWith("dm_")).ToList();
+        var hiding = player.GetComponent<PlayerHiding>();
+        state.position = hiding != null ? hiding.SafeSavePosition : player.transform.position;
+        state.yaw = hiding != null ? hiding.SafeSaveYaw : player.transform.eulerAngles.y;
+        if (BatteryDropManager.Instance != null) BatteryDropManager.Instance.Capture(state);
+        var sanity = player.GetComponent<SanitySystem>(); if (sanity != null) state.sanity = sanity.CurrentSanity;
+        PlayerPrefs.SetString(SaveKey, JsonUtility.ToJson(state)); PlayerPrefs.Save();
+    }
+    void Log(string message) { actionLog.Add(Mathf.RoundToInt(state.seconds) + "s | " + message); Debug.Log("[DEAD MEMORY] " + message); }
+    void Message(string message, float seconds = 3f) { if (InteractionPrompt.Instance != null) InteractionPrompt.Instance.ShowMessage(message, seconds); }
+    void Pulse() { if (audioSource != null && tick != null) audioSource.PlayOneShot(tick); }
+    string NextHint()
+    {
+        if (!state.toolbox) return "ตู้เครื่องมือใน Storage ชั้น 2 ใช้รหัสจากตารางเรียนห้อง 2A ส่อง UV ที่กระดานเพื่อหาวิธีอ่านตัวเลข";
+        if (!state.power) return "ฟิวส์อยู่ในห้อง 103, 104 และ 106 ตะแกรงห้อง 103 ต้องใช้ไขควง ส่วนผังลำดับสวิตช์อยู่บนผนังห้องครูฝั่งตะวันตก ชั้น 2";
+        if (!state.supply || !state.records) return "ใช้ชะแลงกับตู้ห้อง 106 และใช้กุญแจในกระเป๋าห้อง 103 กับตู้แฟ้มห้องครูฝั่งตะวันตก ชั้น 2";
+        if (!state.clock) return "นาฬิกาห้องครูฝั่งตะวันออก ชั้น 2 ต้องใส่เข็มสองชิ้น เลขที่ของตัวเอกอยู่บนกระดานห้อง 2B ชั้น 2 เลขเพื่อนอยู่ในแฟ้มครู";
+        return "กลับไปตู้รูปถ่ายห้อง 2A ชั้น 2 ใช้กุญแจจากนาฬิกา แล้วใส่เลขสองหลักของตัวเอกตามด้วยเลขสองหลักของเพื่อน";
+    }
+    void Styles()
+    {
+        if (heading != null) return;
+        heading = new GUIStyle(GUI.skin.label) { font = MemoryWorldLabel.Font, fontSize = 30, wordWrap = true, richText = true };
+        heading.normal.textColor = new Color(.86f, .8f, .95f);
+        body = new GUIStyle(heading) { fontSize = 21 }; body.normal.textColor = new Color(.83f, .84f, .81f);
+        small = new GUIStyle(body) { fontSize = 16 }; small.normal.textColor = new Color(.65f, .67f, .68f);
+        button = new GUIStyle(GUI.skin.button) { font = MemoryWorldLabel.Font, fontSize = 19, wordWrap = true, fixedHeight = 44 };
+    }
+    bool Button(string text) { return GUILayout.Button(text, button); }
+    void OnGUI()
+    {
+        if (modal == "start" && DeadMemoryTitleMenu.IsVisible) return;
+        Styles();
+        float scale = Mathf.Min(Screen.width / 1280f, Screen.height / 800f); if (scale < 0.1f) return;
+        Matrix4x4 old = GUI.matrix; GUI.matrix = Matrix4x4.TRS(new Vector3((Screen.width - 1280 * scale) / 2, (Screen.height - 800 * scale) / 2), Quaternion.identity, Vector3.one * scale);
+        if (modal == "") { GUI.matrix = old; return; }
+        GUI.color = new Color(.015f, .022f, .025f, modal == "ending" ? fade : .94f); GUI.DrawTexture(new Rect(-500, -500, 2300, 1800), Texture2D.whiteTexture); GUI.color = Color.white;
+        GUILayout.BeginArea(new Rect(100, 55, 1080, 690));
+        GUILayout.Label("DEAD MEMORY  /  ความทรงจำที่หายไป", small); GUILayout.Space(12);
+        if (modal == "start")
+        {
+            GUILayout.Label("เคส 1 — โรงเรียนหลังเลิกเรียน", heading); GUILayout.Space(20);
+            GUILayout.Label("คุณลืมตาขึ้นในห้องเรียนเก่า ทั้งโรงเรียนเงียบสนิท\nมีบางอย่างถูกลบออกจากที่นี่… แต่แสงสีม่วงอาจทำให้มันปรากฏอีกครั้ง", body);
+            GUILayout.Space(24); GUILayout.Label("WASD เดิน • Shift วิ่ง • เมาส์มอง • Q วนไฟขาว/UV/ปิด • E สำรวจ\nTab เปิดสมุดบันทึกและไอเท็ม • Esc ปิดหน้าต่าง\nบันทึกความคืบหน้าอัตโนมัติเมื่อสำรวจหรือแก้ปริศนา", body);
+            GUILayout.Space(25);
+            if (PlayerPrefs.HasKey(SaveKey) && Button("เล่นต่อจากบันทึก")) ContinueCase();
+            if (Button("เริ่มความทรงจำใหม่")) BeginNewCase();
+        }
+        else if (modal == "ending")
+        {
+            GUILayout.Space(70); GUILayout.Label("เราจำได้แล้ว… ว่าใครหายไป", heading);
+            GUILayout.Space(24); GUILayout.Label("รูปถ่ายเป็นภาพของคุณกับเพื่อนสนิทในโรงเรียนแห่งนี้\nใบหน้าของเพื่อนค่อย ๆ มืดดำ ขณะที่เสียงกลไกนาฬิกาหยุดลง\nความทรงจำถัดไปกำลังเปิดออก", body);
+            GUILayout.Space(35); GUILayout.Label("จบเคส 1 — โรงเรียน\nเวลาที่ใช้ " + TimeSpan.FromSeconds(state.seconds).ToString(@"mm\:ss") + "  •  หลักฐาน " + state.notes.Count + " ชิ้น", body);
+            GUILayout.Space(25); if (Button("เล่นเคสนี้ใหม่")) BeginNewCase();
+        }
+        else if (modal == "journal")
+        {
+            GUILayout.Label("สมุดบันทึกนักสืบ", heading); GUILayout.Space(8);
+            GUILayout.Label("สิ่งที่พก: " + (inventory.Count == 0 ? "—" : string.Join(" / ", inventory.ItemIds.Select(inventory.NameOf))), small);
+            GUILayout.BeginVertical(GUILayout.Height(375)); journalScroll = GUILayout.BeginScrollView(journalScroll);
+            foreach (string id in state.notes)
+            {
+                var note = objects.FirstOrDefault(x => x.id == id); if (note == null) continue;
+                GUILayout.Label(note.title, body); GUILayout.Label(note.text, small); GUILayout.Space(12);
+            }
+            GUILayout.EndScrollView(); GUILayout.EndVertical();
+            if (Button("ขอคำใบ้")) { hint = NextHint(); state.hintCount++; hintAt = Time.unscaledTime; Save(); }
+            if (!string.IsNullOrEmpty(hint)) GUILayout.Label(hint, small);
+            if (Button("กลับ  [Tab]")) CloseJournal();
+        }
+        else
+        {
+            GUILayout.Label(current != null ? current.title : "ตรวจสิ่งของ", heading); GUILayout.Space(12);
+            if (modal == "note") GUILayout.Label(current.text, body);
+            if (modal == "toolbox" || modal == "locker")
+            {
+                GUILayout.Label(modal == "toolbox" ? "กุญแจรหัส 3 หลัก — ใบ้ไว้ในตารางเรียนห้อง 2A" : "ล็อกเกอร์รูปถ่าย / รหัส 4 หลัก\nเลขของฉัน ตามด้วยเลขของเพื่อน และกุญแจที่อยู่ในนาฬิกา", body);
+                GUILayout.Space(12); GUILayout.Label(enteredCode.PadRight(modal == "toolbox" ? 3 : 4, '—'), heading);
+                for (int row = 0; row < 3; row++) { GUILayout.BeginHorizontal(); for (int col = 1; col <= 3; col++) { int d = row * 3 + col; if (Button(d.ToString())) PressDigit(d); } GUILayout.EndHorizontal(); }
+                GUILayout.BeginHorizontal(); if (Button("ลบ")) enteredCode = ""; if (Button("0")) PressDigit(0); if (Button("ยืนยัน")) SubmitCode(); GUILayout.EndHorizontal();
+            }
+            if (modal == "breaker")
+            {
+                GUILayout.Label("ช่องฟิวส์: " + state.fuses.Count + "/3\nคืนไฟให้กลไกตู้เครื่องมือ ต้องเรียงสวิตช์ตามผัง UV ที่ห้องครูฝั่งตะวันตก ชั้น 2", body);
+                if (Button("ใส่ฟิวส์ที่มี")) InstallFuses();
+                GUILayout.BeginHorizontal(); if (Button("สวิตช์ซ้าย")) PressBreaker(0); if (Button("สวิตช์กลาง")) PressBreaker(1); if (Button("สวิตช์ขวา")) PressBreaker(2); GUILayout.EndHorizontal();
+            }
+            if (modal == "clock")
+            {
+                GUILayout.Label("เข็มชั่วโมง: " + (state.hourInstalled ? "ใส่แล้ว" : "ยังขาด") + "   /   เข็มนาที: " + (state.minuteInstalled ? "ใส่แล้ว" : "ยังขาด"), body);
+                if (Button("ใส่เข็มที่เก็บมา")) InstallClockParts();
+                GUILayout.Label(clockH.ToString("00") + ":" + clockM.ToString("00"), heading);
+                GUILayout.BeginHorizontal(); if (Button("ชั่วโมง −")) AdjustClock(-1, 0); if (Button("ชั่วโมง +")) AdjustClock(1, 0); if (Button("นาที −5")) AdjustClock(0, -5); if (Button("นาที +5")) AdjustClock(0, 5); GUILayout.EndHorizontal();
+                if (Button("ยืนยันเวลาที่หยุดลง")) ConfirmClock();
+            }
+            if (!string.IsNullOrEmpty(feedback)) GUILayout.Label(feedback, body);
+            GUILayout.Space(15); if (Button("สมุดบันทึก  [Tab]")) { previousModal = modal; modal = "journal"; }
+            if (Button("กลับ  [Esc]")) CloseModal();
+        }
+        GUILayout.EndArea(); GUI.matrix = old;
+    }
+    Vector2 journalScroll;
+}

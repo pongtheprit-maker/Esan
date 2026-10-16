@@ -1,0 +1,38 @@
+DEAD MEMORY — Case 1 Play Mode test
+FAILED
+Movement blocked at (-20.51, 3.53, 23.86) toward (-20.95, 3.54, 23.85) at toolbox
+Real seconds: 56.4
+Walked metres: 53.6
+Assertions: 23
+PASS | New case spawns on second floor
+PASS | Ending locker remains on second floor
+PASS | Electrical panel is in upstairs Storage
+PASS | Notes have no world-space explanation text
+PASS | Medium sanity gradually changes atmosphere
+PASS | Low sanity deepens red world and strange ambience
+PASS | Atmosphere adds no jumpscare or health damage
+PASS | Atmosphere restores smoothly when sanity returns
+PASS | Clear line of sight and reach: intro
+PASS | Player E command accepted: intro
+PASS | Opened readable: intro
+PASS | Clear line of sight and reach: timetable
+PASS | Player E command accepted: timetable
+PASS | Opened readable: timetable
+PASS | Clear line of sight and reach: uv_schedule
+PASS | White flashlight does not reveal UV clue
+PASS | UV reveals physical trace; explanation waits for E inspection
+PASS | Clear line of sight and reach: uv_schedule
+PASS | Player E command accepted: uv_schedule
+PASS | Opened readable: uv_schedule
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Correct final code alone cannot bypass missing key
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2A
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+12s | บันทึก: สมุดที่ติดอยู่บนผนัง / ห้อง 2A
+14s | บันทึก: ตารางเรียนเก่า / ห้อง 2A
+24s | บันทึก: รอยหมึกบนกระดาน / ห้อง 2A
+Position: (-20.51, 3.53, 23.86)
+Waypoint: (-20.95, 3.54, 23.85)

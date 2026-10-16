@@ -1,0 +1,111 @@
+DEAD MEMORY — Case 1 Play Mode test
+FAILED
+Clear line of sight and reach: records at records
+Real seconds: 394.1
+Walked metres: 660.3
+Assertions: 72
+PASS | New case spawns on second floor
+PASS | Ending locker remains on second floor
+PASS | Electrical panel is in upstairs Storage
+PASS | Notes have no world-space explanation text
+PASS | Medium sanity gradually changes atmosphere
+PASS | Low sanity deepens red world and strange ambience
+PASS | Atmosphere adds no jumpscare or health damage
+PASS | Atmosphere restores smoothly when sanity returns
+PASS | Clear line of sight and reach: intro
+PASS | Player E command accepted: intro
+PASS | Opened readable: intro
+PASS | Clear line of sight and reach: timetable
+PASS | Player E command accepted: timetable
+PASS | Opened readable: timetable
+PASS | Clear line of sight and reach: uv_schedule
+PASS | White flashlight does not reveal UV clue
+PASS | UV reveals physical trace; explanation waits for E inspection
+PASS | Clear line of sight and reach: uv_schedule
+PASS | Player E command accepted: uv_schedule
+PASS | Opened readable: uv_schedule
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Correct final code alone cannot bypass missing key
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2A
+OPEN DOOR via aimed E | SecondFloorDoor_Storage
+PASS | Clear line of sight and reach: toolbox
+PASS | Player E command accepted: toolbox
+PASS | Wrong toolbox code rejected
+PASS | Toolbox opens with 825 and gives screwdriver
+PASS | Clear line of sight and reach: maintenance
+PASS | Player E command accepted: maintenance
+PASS | Opened readable: maintenance
+PASS | Clear line of sight and reach: floor_plan
+PASS | Player E command accepted: floor_plan
+PASS | Opened readable: floor_plan
+PASS | Clear line of sight and reach: blue_fuse
+PASS | Player E command accepted: blue_fuse
+PASS | Blue fuse picked up with real E interaction
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2B
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Player E command accepted: uv_my_number
+PASS | Opened readable: uv_my_number
+OPEN DOOR via aimed E | Door_R2
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Jammed locker rejects missing crowbar
+PASS | Clear line of sight and reach: green_fuse
+PASS | Player E command accepted: green_fuse
+PASS | Green fuse collected
+OPEN DOOR via aimed E | SecondFloorDoor_Staff_West
+PASS | Clear line of sight and reach: records
+PASS | Player E command accepted: records
+PASS | Records drawer rejects missing staff key
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Player E command accepted: uv_breakers
+PASS | Opened readable: uv_breakers
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | Electrical panel UI opens
+PASS | Incomplete fuses cannot power panel
+OPEN DOOR via aimed E | Door_L1
+PASS | Clear line of sight and reach: vent
+PASS | Player E command accepted: vent
+PASS | Screwdriver opens vent and retrieves red fuse
+PASS | Clear line of sight and reach: staff_key
+PASS | Player E command accepted: staff_key
+PASS | Staff key collected
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | All three fuses installed without duplication
+PASS | Wrong switch order resets safely without consuming fuses
+PASS | Left-right-middle restores power and releases crowbar
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Crowbar opens locker and yields hour hand
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+12s | บันทึก: สมุดที่ติดอยู่บนผนัง / ห้อง 2A
+14s | บันทึก: ตารางเรียนเก่า / ห้อง 2A
+24s | บันทึก: รอยหมึกบนกระดาน / ห้อง 2A
+54s | รหัสกล่องเครื่องมือผิด
+54s | ได้รับ ไขควงปากแบน
+54s | ปลดล็อกกล่องเครื่องมือ 825
+56s | บันทึก: ใบแจ้งซ่อม / Storage ชั้น 2
+64s | บันทึก: ผังอาคารเรียน
+91s | ได้รับ ฟิวส์สีน้ำเงิน
+131s | บันทึก: รอยหมึกบนกระดาน / ห้อง 2B
+182s | ได้รับ ฟิวส์สีเขียว
+228s | บันทึก: ผังวงจรที่ถูกลบ / ห้องครูฝั่งตะวันตก ชั้น 2
+237s | ใส่ ฟิวส์สีน้ำเงิน
+237s | ใส่ ฟิวส์สีเขียว
+275s | ได้รับ ฟิวส์สีแดง
+275s | เปิดตะแกรงและเก็บฟิวส์สีแดง
+278s | ได้รับ กุญแจลิ้นชักครู
+315s | ใส่ ฟิวส์สีแดง
+315s | ลำดับสวิตช์ผิด
+315s | ได้รับ ชะแลง
+315s | คืนไฟตามผัง ซ้าย-ขวา-กลาง
+354s | ได้รับ เข็มชั่วโมง
+354s | งัดตู้และพบเข็มชั่วโมง
+Position: (-27.66, 3.53, 16.83)
+Waypoint: (-27.60, 3.54, 16.85)

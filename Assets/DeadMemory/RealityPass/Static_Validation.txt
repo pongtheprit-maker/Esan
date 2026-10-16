@@ -1,0 +1,8 @@
+Reality pass static inspection
+Processed static cuboid meshes: 1598
+Axis-aligned triangles inspected: 19122
+Triangle intersection comparisons: 428
+Coplanar overlap pairs > 0.0001 square metres within 1.5 mm: 0
+Supported furniture contact groups: 353
+Unresolved furniture/component contact groups: 0
+FURNITURE CONTACT DETAILS

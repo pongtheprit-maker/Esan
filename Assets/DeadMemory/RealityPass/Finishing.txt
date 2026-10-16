@@ -1,0 +1,26 @@
+CLEAR ARC | SecondFloorDoor_Restroom_Women
+CLEAR ARC | Men_StallDoor_3
+CLEAR ARC | SecondFloorDoor_Staff_West
+FITTED HINGE | Door_L1 shift=0.08m; previous contact=School/Structure/CorridorWall_L_seg1 (0.004m)
+FITTED HINGE | Door_R2 shift=0.08m; previous contact=School/Structure/CorridorWall_R_seg2 (0.004m)
+FITTED HINGE | Door_R1 shift=0.08m; previous contact=School/Structure/CorridorWall_R_seg1 (0.004m)
+FITTED HINGE | Door_L2 shift=0.08m; previous contact=School/Structure/CorridorWall_L_seg2 (0.004m)
+FITTED HINGE | Door_R0 shift=0.08m; previous contact=School/Structure/CorridorWall_R_seg0 (0.004m)
+CLEAR ARC | Door_L3
+CLEAR ARC | Men_StallDoor_1
+CLEAR ARC | SecondFloorDoor_Restroom_Men
+FITTED HINGE | Door_R3 shift=0.08m; previous contact=School/Structure/CorridorWall_R_seg3 (0.004m)
+CLEAR ARC | Women_StallDoor_2
+CLEAR ARC | Men_StallDoor_2
+CLEAR ARC | Women_StallDoor_5
+CLEAR ARC | SecondFloorDoor_Classroom_2B
+CLEAR ARC | Women_StallDoor_1
+CLEAR ARC | Women_StallDoor_4
+CLEAR ARC | SecondFloorDoor_Classroom_2A
+CLEAR ARC | SecondFloorDoor_Storage
+CLEAR ARC | Women_StallDoor_3
+CLEAR ARC | SecondFloorDoor_Staff_East
+Decay patches fixed to actual wall/ceiling within 3mm: 106; unresolved: 5
+
+Unsupported patches crossing window openings deactivated: 5.
+Visible hinge pins aligned with actual rotation axes: 66

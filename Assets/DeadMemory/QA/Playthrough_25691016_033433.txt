@@ -1,0 +1,106 @@
+DEAD MEMORY — Case 1 Play Mode test
+PASSED
+
+Real seconds: 264.4
+Walked metres: 422.0
+Assertions: 86
+PASS | Clear line of sight and reach: intro
+PASS | Player E command accepted: intro
+PASS | Opened readable: intro
+PASS | Clear line of sight and reach: timetable
+PASS | Player E command accepted: timetable
+PASS | Opened readable: timetable
+PASS | Clear line of sight and reach: uv_schedule
+PASS | White flashlight does not reveal UV clue
+PASS | UV beam reveals and records clue
+PASS | Clear line of sight and reach: uv_schedule
+PASS | Player E command accepted: uv_schedule
+PASS | Opened readable: uv_schedule
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Correct final code alone cannot bypass missing key
+PASS | Clear line of sight and reach: toolbox
+PASS | Player E command accepted: toolbox
+PASS | Wrong toolbox code rejected
+PASS | Toolbox opens with 825 and gives screwdriver
+PASS | Clear line of sight and reach: maintenance
+PASS | Player E command accepted: maintenance
+PASS | Opened readable: maintenance
+PASS | Clear line of sight and reach: floor_plan
+PASS | Player E command accepted: floor_plan
+PASS | Opened readable: floor_plan
+PASS | Clear line of sight and reach: blue_fuse
+PASS | Player E command accepted: blue_fuse
+PASS | Blue fuse picked up with real E interaction
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Clear line of sight and reach: uv_my_number
+PASS | Player E command accepted: uv_my_number
+PASS | Opened readable: uv_my_number
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Jammed locker rejects missing crowbar
+PASS | Clear line of sight and reach: green_fuse
+PASS | Player E command accepted: green_fuse
+PASS | Green fuse collected
+PASS | Clear line of sight and reach: records
+PASS | Player E command accepted: records
+PASS | Records drawer rejects missing staff key
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Clear line of sight and reach: uv_breakers
+PASS | Player E command accepted: uv_breakers
+PASS | Opened readable: uv_breakers
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | Electrical panel UI opens
+PASS | Incomplete fuses cannot power panel
+PASS | Clear line of sight and reach: vent
+PASS | Player E command accepted: vent
+PASS | Screwdriver opens vent and retrieves red fuse
+PASS | Clear line of sight and reach: staff_key
+PASS | Player E command accepted: staff_key
+PASS | Staff key collected
+PASS | Clear line of sight and reach: fuse_panel
+PASS | Player E command accepted: fuse_panel
+PASS | All three fuses installed without duplication
+PASS | Wrong switch order resets safely without consuming fuses
+PASS | Left-right-middle restores power and releases crowbar
+PASS | Clear line of sight and reach: supply
+PASS | Player E command accepted: supply
+PASS | Crowbar opens locker and yields hour hand
+PASS | Clear line of sight and reach: records
+PASS | Player E command accepted: records
+PASS | Staff key opens drawer and yields minute hand
+PASS | New case resets progression and items
+PASS | Continue restores real checkpoint, notes, consumed fuses and inventory
+PASS | Clear line of sight and reach: clock_note
+PASS | Player E command accepted: clock_note
+PASS | Opened readable: clock_note
+PASS | Clear line of sight and reach: clock
+PASS | Player E command accepted: clock
+PASS | Clock inspection opens
+PASS | Clock cannot solve before hands installed
+PASS | Both hands installed and consumed exactly once
+PASS | Wrong clock time rejected
+PASS | 03:15 solves clock and releases photograph key
+PASS | Clear line of sight and reach: photo_locker
+PASS | Player E command accepted: photo_locker
+PASS | Wrong final code preserves key and remains recoverable
+PASS | Final locker uses key and correct code
+PASS | Clear line of sight and reach: photograph
+PASS | Player E command accepted: photograph
+PASS | Photograph completes Case 1 through real raycast interaction
+PASS | Key UV evidence preserved through checkpoint
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+230s | บันทึก: ข้อความหลังนาฬิกา / ห้อง 108
+232s | ใส่เข็มชั่วโมง
+232s | ใส่เข็มนาที
+232s | ตั้งนาฬิกาผิด
+232s | ได้รับ กุญแจตู้รูปถ่าย
+232s | ตั้งนาฬิกา 03:15 และเปิดช่องลับ
+259s | รหัสตู้รูปถ่ายผิด
+259s | ปลดล็อกตู้รูปถ่าย 0315
+262s | ตรวจรูปถ่าย — จบความทรงจำโรงเรียน
+Position: (-7.14, 0.03, 7.75)
+Waypoint: (-7.15, 0.03, 7.75)

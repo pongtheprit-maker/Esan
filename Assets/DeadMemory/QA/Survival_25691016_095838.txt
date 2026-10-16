@@ -1,0 +1,45 @@
+DEAD MEMORY — Hiding and batteries Play Mode test
+FAILED
+Timeout: enter 2F_StaffHall phase=Outside at 2F_StaffHall
+Real seconds: 32.1
+Walked metres: 27.7
+Assertions: 31
+COMPONENT SIMULATION: controlled charge/time values; fresh case resets them before real traversal.
+PASS | Full four-cell pack rejects extra battery
+PASS | 90 white-light seconds consume one cell
+PASS | 75 UV seconds consume one cell
+PASS | Lowered flashlight consumes no battery
+PASS | Charge depletion clamps exactly to zero
+PASS | One world battery restores one of four cells
+PASS | Rare flicker occurs once within first 121 lit seconds
+PASS | Lowering flashlight clears temporary flicker
+PASS | Six hiding cabinets split evenly across both floors
+PASS | New case drops exactly seven single batteries
+PASS | Initial wave is distributed over both floors
+PASS | Enough distinct supported spawn locations for repeated waves
+PASS | Battery HUD has four charge segments
+PASS | Spawned battery has physical support: 14
+PASS | Spawned battery has physical support: 20
+PASS | Spawned battery has physical support: 10
+PASS | Spawned battery has physical support: 40
+PASS | Spawned battery has physical support: 8
+PASS | Spawned battery has physical support: 37
+PASS | Spawned battery has physical support: 3
+PASS | Clear line of sight and reach: battery:3
+PASS | Aimed E cannot consume a pickup while full
+PASS | Real Q raises white beam and drains battery
+PASS | Real E collects one cell and caps charge at four
+PASS | Repeated E cannot collect the same battery twice
+PASS | Real Q UV mode drains faster than white mode
+PASS | Real Q lowers beam and stops drain
+PASS | Clear line of sight and reach: intro
+PASS | Existing E inspection still opens a readable note
+PASS | Read UI pauses resource clocks and blocks Q
+OPEN DOOR via aimed E | SecondFloorDoor_Classroom_2A
+PASS | Clear line of sight and reach: 2F_StaffHall
+
+GAME EVENT LOG
+0s | เริ่มความทรงจำ
+8s | บันทึก: สมุดที่ติดอยู่บนผนัง / ห้อง 2A
+Position: (-18.15, 3.53, 16.50)
+Waypoint: (-18.15, 3.54, 16.50)
