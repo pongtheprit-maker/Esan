@@ -12,6 +12,23 @@
 /[Uu]ser[Ss]ettings/
 *.log
 
+# Nested Unity project caches. Keep nested Assets and project files visible,
+# but don't let generated editor data flood the parent repository's changes.
+/Esan6/[Ll]ibrary/
+/Esan6/[Tt]emp/
+/Esan6/[Oo]bj/
+/Esan6/[Bb]uild/
+/Esan6/[Bb]uilds/
+/Esan6/[Ll]ogs/
+/Esan6/[Uu]ser[Ss]ettings/
+/My project/[Ll]ibrary/
+/My project/[Tt]emp/
+/My project/[Oo]bj/
+/My project/[Bb]uild/
+/My project/[Bb]uilds/
+/My project/[Ll]ogs/
+/My project/[Uu]ser[Ss]ettings/
+
 # MemoryCaptures can get excessive in size.
 # They also could contain extremely sensitive data
 /[Mm]emoryCaptures/
