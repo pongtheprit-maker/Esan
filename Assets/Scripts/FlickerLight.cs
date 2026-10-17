@@ -36,6 +36,10 @@ public class FlickerLight : MonoBehaviour
 
     void Update()
     {
+        // Runtime script reloads can leave non-serialized state uninitialized until Awake runs again.
+        if (block == null)
+            block = new MaterialPropertyBlock();
+
         if (Time.time >= nextChange)
         {
             if (burstRemaining > 0)

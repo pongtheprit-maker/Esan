@@ -78,3 +78,53 @@ protected override void OnPopulateMesh(VertexHelper vh)
         vh.AddTriangle(start, start + 2, start + 3);
     }
 }
+
+/// <summary>Procedurally draws the small head silhouette used behind the sanity value.</summary>
+[RequireComponent(typeof(CanvasRenderer))]
+public class SanityHeadGraphic : MaskableGraphic
+{
+    static readonly Vector2[] Shoulders =
+    {
+        new Vector2(.34f, .36f), new Vector2(.69f, .36f), new Vector2(.72f, .18f),
+        new Vector2(.94f, .02f), new Vector2(.08f, .02f), new Vector2(.30f, .18f)
+    };
+
+    static readonly Vector2[] HeadProfile =
+    {
+        new Vector2(.25f, .77f), new Vector2(.31f, .91f), new Vector2(.48f, .99f),
+        new Vector2(.69f, .97f), new Vector2(.83f, .86f), new Vector2(.87f, .74f),
+        new Vector2(.84f, .65f), new Vector2(.96f, .58f), new Vector2(.84f, .53f),
+        new Vector2(.83f, .40f), new Vector2(.72f, .32f), new Vector2(.43f, .34f),
+        new Vector2(.29f, .45f), new Vector2(.23f, .60f)
+    };
+
+    protected override void OnPopulateMesh(VertexHelper vh)
+    {
+        vh.Clear();
+        Rect rect = GetPixelAdjustedRect();
+        AddPolygon(vh, Shoulders, rect);
+        AddPolygon(vh, HeadProfile, rect);
+    }
+
+    void AddPolygon(VertexHelper vh, Vector2[] points, Rect rect)
+    {
+        int start = vh.currentVertCount;
+        Vector2 center = Vector2.zero;
+        for (int i = 0; i < points.Length; i++) center += points[i];
+        center /= points.Length;
+
+        UIVertex vertex = UIVertex.simpleVert;
+        vertex.color = color;
+        vertex.position = new Vector2(rect.xMin + center.x * rect.width, rect.yMin + center.y * rect.height);
+        vh.AddVert(vertex);
+
+        for (int i = 0; i < points.Length; i++)
+        {
+            vertex.position = new Vector2(rect.xMin + points[i].x * rect.width, rect.yMin + points[i].y * rect.height);
+            vh.AddVert(vertex);
+        }
+
+        for (int i = 0; i < points.Length; i++)
+            vh.AddTriangle(start, start + 1 + i, start + 1 + ((i + 1) % points.Length));
+    }
+}

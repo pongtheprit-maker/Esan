@@ -1,15 +1,17 @@
 using UnityEngine;
 using UnityEngine.UI;
 
-/// <summary>Small runtime HUD: sanity meter at lower-left and ECG health trace at upper-right.</summary>
+/// <summary>Runtime horror HUD: sanity head, stamina bar, and ECG health trace.</summary>
 [DisallowMultipleComponent]
 public class SanityHUD : MonoBehaviour
 {
     Canvas canvas;
-    Image sanityFill;
-    Text sanityLabel;
     Text sanityValue;
+    SanityHeadGraphic sanityHead;
+    Image staminaFill;
+    Text staminaValue;
     SanityHeartbeatGraphic heartbeat;
+    StaminaSystem staminaSystem;
     float healthBaseRate = 1.05f;
     float healthBaseStrength = .20f;
     Color healthTint = new Color(.46f, .82f, .60f, .92f);
@@ -43,51 +45,36 @@ public class SanityHUD : MonoBehaviour
 
         RectTransform root = canvasObject.GetComponent<RectTransform>();
         BuildSanityMeter(root);
+        BuildStaminaMeter(root);
         BuildHeartbeat(root);
 
         SetSanity(system.CurrentSanity, system.maxSanity, system.Distortion);
         SetHealth(system.Health, system.maxHealth);
+        staminaSystem = system.GetComponent<StaminaSystem>();
+        SetStamina(staminaSystem != null ? staminaSystem.Normalized : 1f);
+    }
+
+    void Update()
+    {
+        if (staminaSystem != null)
+            SetStamina(staminaSystem.Normalized);
     }
 
 void BuildSanityMeter(RectTransform canvasRoot)
     {
-        RectTransform group = MakeRect("SanityMeter", canvasRoot, new Vector2(268f, 58f),
-                                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(56f, 28f));
-        Image plate = group.gameObject.AddComponent<Image>();
-        plate.sprite = whiteSprite;
-        plate.color = new Color(.012f, .020f, .025f, .74f);
-        plate.raycastTarget = false;
+        RectTransform head = MakeRect("SanityHead", canvasRoot, new Vector2(142f, 154f),
+                                      new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(90f, 70f));
+        if (head.GetComponent<CanvasRenderer>() == null)
+            head.gameObject.AddComponent<CanvasRenderer>();
+        sanityHead = head.gameObject.AddComponent<SanityHeadGraphic>();
+        sanityHead.color = new Color(.78f, .82f, .83f, .82f);
+        sanityHead.raycastTarget = false;
 
-        sanityLabel = MakeText("SanityLabel", group, new Vector2(112f, 22f),
-                               new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(10f, -5f),
-                               16, TextAnchor.MiddleLeft);
-        sanityLabel.text = "SANITY";
-        sanityLabel.fontStyle = FontStyle.Bold;
-        sanityLabel.color = new Color(.57f, .78f, .78f, .96f);
-
-        sanityValue = MakeText("SanityValue", group, new Vector2(58f, 22f),
-                               new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-10f, -5f),
-                               16, TextAnchor.MiddleRight);
+        sanityValue = MakeText("SanityValue", head, new Vector2(100f, 42f),
+                               new Vector2(.45f, .50f), new Vector2(.5f, .5f), Vector2.zero,
+                               30, TextAnchor.MiddleCenter);
         sanityValue.fontStyle = FontStyle.Bold;
-        sanityValue.color = new Color(.78f, .88f, .86f, .96f);
-
-        RectTransform track = MakeRect("SanityTrack", group, new Vector2(248f, 18f),
-                                       new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(10f, 9f));
-        Image trackImage = track.gameObject.AddComponent<Image>();
-        trackImage.sprite = whiteSprite;
-        trackImage.color = new Color(.07f, .11f, .12f, .98f);
-        trackImage.raycastTarget = false;
-
-        RectTransform fill = MakeRect("SanityFill", track, new Vector2(248f, 18f),
-                                      new Vector2(0f, .5f), new Vector2(0f, .5f), Vector2.zero);
-        sanityFill = fill.gameObject.AddComponent<Image>();
-        sanityFill.sprite = whiteSprite;
-        sanityFill.type = Image.Type.Filled;
-        sanityFill.fillMethod = Image.FillMethod.Horizontal;
-        sanityFill.fillOrigin = (int)Image.OriginHorizontal.Left;
-        sanityFill.fillAmount = 1f;
-        sanityFill.color = new Color(.28f, .79f, .77f, 1f);
-        sanityFill.raycastTarget = false;
+        sanityValue.color = Color.white;
     }
 
 void BuildHeartbeat(RectTransform canvasRoot)
@@ -98,6 +85,59 @@ void BuildHeartbeat(RectTransform canvasRoot)
             pulse.gameObject.AddComponent<CanvasRenderer>();
         heartbeat = pulse.gameObject.AddComponent<SanityHeartbeatGraphic>();
         heartbeat.raycastTarget = false;
+    }
+
+    void BuildStaminaMeter(RectTransform canvasRoot)
+    {
+        RectTransform group = MakeRect("StaminaMeter", canvasRoot, new Vector2(300f, 58f),
+                                      new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-56f, 28f));
+        Image plate = group.gameObject.AddComponent<Image>();
+        plate.sprite = whiteSprite;
+        plate.color = new Color(.012f, .020f, .025f, .74f);
+        plate.raycastTarget = false;
+
+        Text label = MakeText("StaminaLabel", group, new Vector2(174f, 22f),
+                              new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(10f, -5f),
+                              16, TextAnchor.MiddleLeft);
+        label.text = "STAMINA";
+        label.fontStyle = FontStyle.Bold;
+        label.color = new Color(.27f, .91f, .94f, .96f);
+
+        staminaValue = MakeText("StaminaValue", group, new Vector2(80f, 22f),
+                                new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-10f, -5f),
+                                16, TextAnchor.MiddleRight);
+        staminaValue.fontStyle = FontStyle.Bold;
+        staminaValue.color = new Color(.84f, .92f, .90f, .96f);
+
+        RectTransform track = MakeRect("StaminaTrack", group, new Vector2(280f, 18f),
+                                       new Vector2(0f, 0f), new Vector2(0f, 0f), new Vector2(10f, 9f));
+        Image trackImage = track.gameObject.AddComponent<Image>();
+        trackImage.sprite = whiteSprite;
+        trackImage.color = new Color(.07f, .11f, .12f, .98f);
+        trackImage.raycastTarget = false;
+
+        RectTransform fill = MakeRect("StaminaFill", track, new Vector2(280f, 18f),
+                                      new Vector2(0f, .5f), new Vector2(0f, .5f), Vector2.zero);
+        staminaFill = fill.gameObject.AddComponent<Image>();
+        staminaFill.sprite = whiteSprite;
+        staminaFill.type = Image.Type.Filled;
+        staminaFill.fillMethod = Image.FillMethod.Horizontal;
+        staminaFill.fillOrigin = (int)Image.OriginHorizontal.Left;
+        staminaFill.fillAmount = 1f;
+        staminaFill.color = new Color(.27f, .91f, .94f, 1f);
+        staminaFill.raycastTarget = false;
+    }
+
+    void SetStamina(float normalized)
+    {
+        float value = Mathf.Clamp01(normalized);
+        if (staminaFill != null)
+        {
+            staminaFill.fillAmount = value;
+            staminaFill.color = new Color(.27f, .91f, .94f, 1f);
+        }
+        if (staminaValue != null)
+            staminaValue.text = Mathf.CeilToInt(value * 100f).ToString("00");
     }
 
     RectTransform MakeRect(string objectName, RectTransform parent, Vector2 size,
@@ -132,20 +172,8 @@ void BuildHeartbeat(RectTransform canvasRoot)
 
     public void SetSanity(float value, float maximum, float distortion)
     {
-        if (sanityFill == null) return;
-        float normalized = Mathf.Clamp01(value / Mathf.Max(1f, maximum));
-        sanityFill.fillAmount = normalized;
-        if (sanityValue != null) sanityValue.text = Mathf.RoundToInt(value).ToString();
-
-        Color calm = new Color(.28f, .79f, .77f, 1f);
-        Color strained = new Color(.80f, .61f, .31f, 1f);
-        Color unstable = new Color(.68f, .25f, .18f, 1f);
-        Color tint = normalized > .5f ? Color.Lerp(calm, strained, (1f - normalized) * 2f)
-                                     : Color.Lerp(strained, unstable, 1f - normalized * 2f);
-        sanityFill.color = tint;
-        if (sanityLabel != null)
-            sanityLabel.color = Color.Lerp(new Color(.57f, .78f, .78f, .96f),
-                                           new Color(.82f, .42f, .32f, .98f), Mathf.Clamp01(distortion));
+        if (sanityValue == null) return;
+        sanityValue.text = Mathf.RoundToInt(value).ToString();
     }
 
 public void SetHealth(int health, int maximum)
